@@ -20,6 +20,13 @@ $RECYCLE.BIN/
 # Visual Studio
 *.suo
 *.db
+*.lastbuildstate
+*.log
+*.opendb
+*.tlog
+*.idb
+*.pdb
+*.obj
 
 # =========================
 # Operating System Files

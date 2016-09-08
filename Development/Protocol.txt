@@ -1,0 +1,12 @@
+ConnectionRequest
+end
+
+ConnectionResponse
+uint8 response
+end
+
+ClientIPAddresses
+string ips array
+uint16 ports array
+uint16 connectionIds array
+end

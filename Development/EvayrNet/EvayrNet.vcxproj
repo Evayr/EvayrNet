@@ -18,6 +18,32 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\connection\Connection.h" />
+    <ClInclude Include="include\connection\IPAddress.h" />
+    <ClInclude Include="include\data\messages\Messages.h" />
+    <ClInclude Include="include\data\messages\MessageTypes.h" />
+    <ClInclude Include="include\data\packet\Packet.h" />
+    <ClInclude Include="include\data\packet\PacketHandler.h" />
+    <ClInclude Include="include\data\stream\DataStream.h" />
+    <ClInclude Include="include\data\stream\DataStreamReader.h" />
+    <ClInclude Include="include\data\stream\DataStreamWriter.h" />
+    <ClInclude Include="include\NetworkManager.h" />
+    <ClInclude Include="include\socket\UDPSocket.h" />
+    <ClInclude Include="include\socket\windows\WindowsUDPSocket.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\connection\Connection.cpp" />
+    <ClCompile Include="src\data\messages\Messages.cpp" />
+    <ClCompile Include="src\data\packet\Packet.cpp" />
+    <ClCompile Include="src\data\packet\PacketHandler.cpp" />
+    <ClCompile Include="src\data\stream\DataStream.cpp" />
+    <ClCompile Include="src\data\stream\DataStreamReader.cpp" />
+    <ClCompile Include="src\data\stream\DataStreamWriter.cpp" />
+    <ClCompile Include="src\NetworkManager.cpp" />
+    <ClCompile Include="src\socket\UDPSocket.cpp" />
+    <ClCompile Include="src\socket\windows\WindowsUDPSocket.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E6222FDA-35AC-419B-99EC-4A5C9F8AF3E6}</ProjectGuid>
     <RootNamespace>EvayrNet</RootNamespace>
@@ -38,7 +64,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -68,7 +94,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\bin\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\bin$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\bin\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -81,6 +114,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>.\include;E:\Software\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -103,14 +137,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

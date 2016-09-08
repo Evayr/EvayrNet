@@ -13,5 +13,117 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Data">
+      <UniqueIdentifier>{a7442e3b-6d62-4161-89d6-3e484d44adc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Data\Stream">
+      <UniqueIdentifier>{19d0e60d-1051-4122-bc7e-5132fbd9a051}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Data\Packet">
+      <UniqueIdentifier>{f8d145e2-facb-4044-b66f-ebb7d0ce3c5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Connection">
+      <UniqueIdentifier>{3c018254-3ec9-481e-9ce5-ed63201d49c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Socket">
+      <UniqueIdentifier>{d29cef77-8680-4e81-9747-b47942e86d30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data">
+      <UniqueIdentifier>{14507983-6c6e-4f60-8c78-0bd2d64cd2e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data\Stream">
+      <UniqueIdentifier>{3cb43505-6d7c-4a9e-aa6d-be468786c548}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data\Packet">
+      <UniqueIdentifier>{20a18b70-0113-43cb-a984-fb15a9b6e62e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Connection">
+      <UniqueIdentifier>{0203b469-4174-4c08-a7b3-83c04c4e80b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Socket">
+      <UniqueIdentifier>{8a53b139-d274-4422-9e7b-633f828d229e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Data\Messages">
+      <UniqueIdentifier>{84278474-74d0-4039-984d-e1c479e4321a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data\Messages">
+      <UniqueIdentifier>{e77ed785-7bc6-4409-9375-7a6daade16a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Socket\Windows">
+      <UniqueIdentifier>{a99b1eb0-a8eb-4068-b216-604a23be292c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Socket\Windows">
+      <UniqueIdentifier>{5dc8634e-e03c-4be8-a632-dce89f6b40f7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\NetworkManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\packet\PacketHandler.h">
+      <Filter>Header Files\Data\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\stream\DataStreamWriter.h">
+      <Filter>Header Files\Data\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\stream\DataStreamReader.h">
+      <Filter>Header Files\Data\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\stream\DataStream.h">
+      <Filter>Header Files\Data\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\packet\Packet.h">
+      <Filter>Header Files\Data\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="include\connection\Connection.h">
+      <Filter>Header Files\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="include\socket\UDPSocket.h">
+      <Filter>Header Files\Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\messages\Messages.h">
+      <Filter>Header Files\Data\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\messages\MessageTypes.h">
+      <Filter>Header Files\Data\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="include\connection\IPAddress.h">
+      <Filter>Header Files\Connection</Filter>
+    </ClInclude>
+    <ClInclude Include="include\socket\windows\WindowsUDPSocket.h">
+      <Filter>Header Files\Socket\Windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\NetworkManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\packet\Packet.cpp">
+      <Filter>Source Files\Data\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\stream\DataStreamWriter.cpp">
+      <Filter>Source Files\Data\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\stream\DataStream.cpp">
+      <Filter>Source Files\Data\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\stream\DataStreamReader.cpp">
+      <Filter>Source Files\Data\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\packet\PacketHandler.cpp">
+      <Filter>Source Files\Data\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="src\connection\Connection.cpp">
+      <Filter>Source Files\Connection</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\messages\Messages.cpp">
+      <Filter>Source Files\Data\Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="src\socket\UDPSocket.cpp">
+      <Filter>Source Files\Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="src\socket\windows\WindowsUDPSocket.cpp">
+      <Filter>Source Files\Socket\Windows</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

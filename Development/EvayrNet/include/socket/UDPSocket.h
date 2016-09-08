@@ -45,8 +45,9 @@ namespace EvayrNet
 		clock_t m_RecvClock;
 
 	protected:
-		virtual void Send()=0;
-		virtual void Receive()=0;
+		virtual void Bind(uint16_t aPort) = 0;
+		virtual void Send() = 0;
+		virtual void Receive() = 0;
 
 		// Connection
 		bool m_Connecting : 1;

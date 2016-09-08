@@ -11,6 +11,12 @@ namespace EvayrNet
 	class NetworkManager
 	{
 	public:
+		enum
+		{
+			kDefaultPort = 37475,
+			kDefaultTickRateSend = 60,
+			kDefaultTickRateRecv = 60,
+		};
 		NetworkManager();
 		~NetworkManager();
 

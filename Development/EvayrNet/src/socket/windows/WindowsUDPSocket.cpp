@@ -4,7 +4,7 @@
 
 using namespace EvayrNet;
 
-WindowsUDPSocket::WindowsUDPSocket(uint8_t aTickRateSend, uint8_t aTickRateRecv)
+WindowsUDPSocket::WindowsUDPSocket(uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv)
 {
 	SetTickRates(aTickRateSend, aTickRateRecv);
 
@@ -22,11 +22,28 @@ WindowsUDPSocket::WindowsUDPSocket(uint8_t aTickRateSend, uint8_t aTickRateRecv)
 	{
 		throw std::system_error(WSAGetLastError(), std::system_category(), "Error opening socket");
 	}
+
+	// Bind socket to port
+	Bind(aPort);
 }
 
 WindowsUDPSocket::~WindowsUDPSocket()
 {
 	WSACleanup();
+}
+
+void WindowsUDPSocket::Bind(uint16_t aPort)
+{
+	sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = htonl(INADDR_ANY);
+	address.sin_port = htons(aPort);
+
+	int32_t result = bind(m_Socket, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
+	if (result < 0)
+	{
+		throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to bind the socket");
+	}
 }
 
 void WindowsUDPSocket::Send()

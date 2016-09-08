@@ -13,10 +13,11 @@ namespace EvayrNet
 	class WindowsUDPSocket : public UDPSocket
 	{
 	public:
-		WindowsUDPSocket(uint8_t aTickRateSend, uint8_t aTickRateRecv);
+		WindowsUDPSocket(uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv);
 		~WindowsUDPSocket();
 
 	private:
+		void Bind(uint16_t aPort);
 		void Send();
 		void Receive();
 

@@ -33,7 +33,6 @@ namespace EvayrNet
 
 	private:
 		void SendHeartbeat();
-		void ProcessMessage();
 
 		IPAddress m_IPAddress;
 

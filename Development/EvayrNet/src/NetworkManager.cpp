@@ -7,6 +7,7 @@ std::unique_ptr<NetworkManager> g_Network = std::make_unique<NetworkManager>();
 
 NetworkManager::NetworkManager()
 {
+	CreateSocket();
 }
 
 NetworkManager::~NetworkManager()

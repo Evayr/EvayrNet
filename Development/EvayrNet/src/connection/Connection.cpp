@@ -14,6 +14,7 @@ Connection::~Connection()
 
 void Connection::Update()
 {
+	SendHeartbeat();
 }
 
 void Connection::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messages::EMessageType aType)
@@ -72,8 +73,7 @@ int16_t Connection::GetConnectionID() const
 
 void Connection::SendHeartbeat()
 {
-}
-
-void Connection::ProcessMessage()
-{
+	// if it's time to send a heartbeat
+	// make a heartbeat message
+	// add to packet
 }

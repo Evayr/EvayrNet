@@ -150,8 +150,9 @@ def EndMessage(messageName, opcode):
 	
 	cpp.write("void " + messageName + "::Serialize(EvayrNet::DataStreamWriter aWriter)\n")
 	cpp.write("{\n")
-	cpp.write(tab + "// Serialize opcode\n")
-	cpp.write(tab + "aWriter.Write(uint8_t(" + str(opcode) + ")); // uint8_t() for safety so Write knows what type it is\n")
+	cpp.write(tab + "// Serialize header\n")
+	cpp.write(tab + "aWriter.Write(GetMessageSize()); // message size\n")
+	cpp.write(tab + "aWriter.Write(uint8_t(" + str(opcode) + ")); // opcode\n")
 	cpp.write(newline)
 	cpp.write(tab + "// Serialize member variables\n")
 	si = 0;

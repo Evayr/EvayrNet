@@ -35,6 +35,8 @@ namespace EvayrNet
 		const char* GetData() const;
 		uint16_t GetDataSize() const;
 
+		DataStream GetDataStream();
+
 	private:
 		DataStream m_DataStream;
 		

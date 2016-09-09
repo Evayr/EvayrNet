@@ -11,6 +11,45 @@ namespace Messages
 Message::Message() {}
 Message::~Message() {}
 
+MessageHeader::MessageHeader()
+{
+}
+
+MessageHeader::~MessageHeader()
+{
+}
+
+void MessageHeader::Serialize(EvayrNet::DataStreamWriter aWriter)
+{
+	// Serialize header
+	aWriter.Write(GetMessageSize()); // message size
+	aWriter.Write(uint8_t(0)); // opcode
+
+	// Serialize member variables
+	aWriter.Write(size);
+	aWriter.Write(opcode);
+}
+
+void MessageHeader::Deserialize(EvayrNet::DataStreamReader aReader)
+{
+	// Deserialize member variables
+	aReader.Read(size);
+	aReader.Read(opcode);
+
+	// Notify receiver that a message has been processed
+	MessageHeader_Receive(*this);
+}
+
+uint16_t MessageHeader::GetMessageSize()
+{
+	return 4;
+}
+
+uint8_t MessageHeader::GetMessageOpcode()
+{
+	return 0;
+}
+
 ConnectionRequest::ConnectionRequest()
 {
 }
@@ -21,8 +60,9 @@ ConnectionRequest::~ConnectionRequest()
 
 void ConnectionRequest::Serialize(EvayrNet::DataStreamWriter aWriter)
 {
-	// Serialize opcode
-	aWriter.Write(uint8_t(0)); // uint8_t() for safety so Write knows what type it is
+	// Serialize header
+	aWriter.Write(GetMessageSize()); // message size
+	aWriter.Write(uint8_t(1)); // opcode
 
 	// Serialize member variables
 }
@@ -42,7 +82,7 @@ uint16_t ConnectionRequest::GetMessageSize()
 
 uint8_t ConnectionRequest::GetMessageOpcode()
 {
-	return 0;
+	return 1;
 }
 
 ConnectionResponse::ConnectionResponse()
@@ -55,8 +95,9 @@ ConnectionResponse::~ConnectionResponse()
 
 void ConnectionResponse::Serialize(EvayrNet::DataStreamWriter aWriter)
 {
-	// Serialize opcode
-	aWriter.Write(uint8_t(1)); // uint8_t() for safety so Write knows what type it is
+	// Serialize header
+	aWriter.Write(GetMessageSize()); // message size
+	aWriter.Write(uint8_t(2)); // opcode
 
 	// Serialize member variables
 	aWriter.Write(response);
@@ -78,7 +119,7 @@ uint16_t ConnectionResponse::GetMessageSize()
 
 uint8_t ConnectionResponse::GetMessageOpcode()
 {
-	return 1;
+	return 2;
 }
 
 ClientIPAddresses::ClientIPAddresses()
@@ -91,8 +132,9 @@ ClientIPAddresses::~ClientIPAddresses()
 
 void ClientIPAddresses::Serialize(EvayrNet::DataStreamWriter aWriter)
 {
-	// Serialize opcode
-	aWriter.Write(uint8_t(2)); // uint8_t() for safety so Write knows what type it is
+	// Serialize header
+	aWriter.Write(GetMessageSize()); // message size
+	aWriter.Write(uint8_t(3)); // opcode
 
 	// Serialize member variables
 	aWriter.Write(uint16_t(ips.size()));
@@ -159,7 +201,7 @@ uint16_t ClientIPAddresses::GetMessageSize()
 
 uint8_t ClientIPAddresses::GetMessageOpcode()
 {
-	return 2;
+	return 3;
 }
 
 } // namespace Messages

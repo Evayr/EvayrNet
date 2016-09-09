@@ -1,3 +1,8 @@
+MessageHeader
+uint16 size
+uint8 opcode
+end
+
 ConnectionRequest
 end
 

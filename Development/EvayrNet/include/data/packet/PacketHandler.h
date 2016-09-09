@@ -8,13 +8,23 @@ namespace EvayrNet
 	class PacketHandler
 	{
 	public:
+		enum
+		{
+			kMaxMessages = 255,
+		};
+
 		PacketHandler();
 		~PacketHandler();
 
-		void ProcessPacket(Packet aPacket);
+		void RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode);
+
+		void ProcessPacket(Packet& aPacket);
 
 	private:
+		void RegisterDefaultMessages();
 		void ProcessMessage();
+
+		Messages::Message* m_Messages[kMaxMessages];
 	};
 }
 

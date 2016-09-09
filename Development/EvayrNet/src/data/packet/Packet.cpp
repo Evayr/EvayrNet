@@ -80,3 +80,8 @@ uint16_t Packet::GetDataSize() const
 
 	return size;
 }
+
+DataStream Packet::GetDataStream()
+{
+	return m_DataStream;
+}

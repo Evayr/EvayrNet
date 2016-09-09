@@ -56,6 +56,11 @@ void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage,
 	m_UDPSocket->AddMessage(apMessage, Messages::EMessageType::MESSAGE_SEQUENCED, aConnectionID);
 }
 
+void NetworkManager::RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode)
+{
+	m_PacketHandler.RegisterMessage(apMessage, aOpCode);
+}
+
 void NetworkManager::SetTickRates(uint8_t aSendTickRate, uint8_t aRecvTickRate)
 {
 	m_UDPSocket->SetTickRates(aSendTickRate, aRecvTickRate);

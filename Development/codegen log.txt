@@ -4,6 +4,25 @@ Filepath: "E:\Projects\GitHub\EvayrNet\Development"
 Start of generation path="E:\Projects\GitHub\EvayrNet\Development\"
 
 Line
+Processing word: "MessageHeader"
+New message name="MessageHeader"
+
+Line
+Processing word: "uint16"
+Processing word: "size"
+New member type="uint16_t" name="size" array="no"
+
+Line
+Processing word: "uint8"
+Processing word: "opcode"
+New member type="uint8_t" name="opcode" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
 Processing word: "ConnectionRequest"
 New message name="ConnectionRequest"
 

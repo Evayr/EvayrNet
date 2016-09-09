@@ -29,6 +29,23 @@ public:
 	virtual uint16_t GetMessageSize(){ return 0; }
 };
 
+class MessageHeader : public Message
+{
+public:
+	MessageHeader();
+	~MessageHeader();
+
+	void Serialize(EvayrNet::DataStreamWriter aWriter);
+	void Deserialize(EvayrNet::DataStreamReader aReader);
+
+	uint16_t GetMessageSize();
+	static uint8_t GetMessageOpcode();
+
+	uint16_t size;
+	uint8_t opcode;
+};
+extern void MessageHeader_Receive(const Messages::MessageHeader& acMessage);
+
 class ConnectionRequest : public Message
 {
 public:

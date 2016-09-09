@@ -87,6 +87,12 @@ void WindowsUDPSocket::Receive()
 		throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to receive data.");
 	}
 
+	// Process IP Address
+	IPAddress ip;
+	ip.m_Address = from.sin_addr.s_addr;
+	ip.m_Port = uint16_t(from.sin_port);
+	CheckConnection(ip);
+
 	// Process the packet
 	Packet packet;
 	packet.SetData(buffer, (uint16_t)length);

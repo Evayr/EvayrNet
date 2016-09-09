@@ -67,9 +67,55 @@ void UDPSocket::SetTickRates(uint8_t aTickRateSend, uint8_t aTickRateRecv)
 	m_ClockPerTickRecv = clock_t(1000.f / (float)aTickRateRecv);
 }
 
+int16_t UDPSocket::CheckConnection(IPAddress aIPAddress)
+{
+	// Checks if the connection is new. If so, create a new Connection
+	// Returns the ConnectionID of the connection
+	for (size_t i = 0; i < m_Connections.size(); ++i)
+	{
+		if (m_Connections[i].GetIPAddress() == aIPAddress && m_Connections[i].IsActive())
+		{
+			return m_Connections[i].GetConnectionID();
+		}
+	}
+
+	// No connection found - create new one
+	int16_t connectionID = int16_t(m_Connections.size());
+	m_Connections.push_back(Connection(aIPAddress, connectionID));
+	return connectionID;
+}
+
 bool UDPSocket::IsConnected() const
 {
 	return m_Connected;
+}
+
+std::shared_ptr<Connection> UDPSocket::GetNewestConnection()
+{
+	if (m_Connections.size() > 0)
+	{
+		std::shared_ptr<Connection> pConnection = std::make_shared<Connection>(m_Connections[m_Connections.size() - 1]);
+		return std::shared_ptr<Connection>();
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+uint8_t EvayrNet::UDPSocket::GetActiveConnectionsCount() const
+{
+	uint8_t count = 0;
+
+	for (size_t i = 0; i < m_Connections.size(); ++i)
+	{
+		if (m_Connections[i].IsActive())
+		{
+			count += 1;
+		}
+	}
+
+	return count;
 }
 
 void UDPSocket::SendPackets()

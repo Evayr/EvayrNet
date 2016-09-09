@@ -31,6 +31,9 @@ namespace EvayrNet
 
 		int16_t GetConnectionID() const;
 
+		void SetActive(bool aVal);
+		bool IsActive() const;
+
 	private:
 		void SendHeartbeat();
 
@@ -40,6 +43,7 @@ namespace EvayrNet
 		std::list<std::shared_ptr<Messages::Message>> m_CachedMessages;
 
 		int16_t m_ConnectionID;
+		bool m_Active;
 	};
 }
 

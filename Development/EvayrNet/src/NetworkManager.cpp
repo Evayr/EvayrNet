@@ -71,3 +71,8 @@ bool NetworkManager::IsConnected() const
 {
 	return m_UDPSocket->IsConnected();
 }
+
+std::shared_ptr<UDPSocket> NetworkManager::GetUDPSocket()
+{
+	return m_UDPSocket;
+}

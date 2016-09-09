@@ -5,6 +5,7 @@ using namespace EvayrNet;
 Connection::Connection(IPAddress aIPAddress, int16_t aConnectionID)
 	: m_IPAddress(aIPAddress)
 	, m_ConnectionID(aConnectionID)
+	, m_Active(true)
 {
 }
 
@@ -69,6 +70,16 @@ const std::list<std::shared_ptr<Messages::Message>>& Connection::GetCachedMessag
 int16_t Connection::GetConnectionID() const
 {
 	return m_ConnectionID;
+}
+
+void Connection::SetActive(bool aVal)
+{
+	m_Active = aVal;
+}
+
+bool Connection::IsActive() const
+{
+	return m_Active;
 }
 
 void Connection::SendHeartbeat()

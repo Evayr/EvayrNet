@@ -26,7 +26,11 @@ namespace EvayrNet
 
 		void SetTickRates(uint8_t aTickRateSend, uint8_t aTickRateRecv);
 
+		int16_t CheckConnection(IPAddress aIPAddress);
+
 		bool IsConnected() const;
+		std::shared_ptr<Connection> GetNewestConnection();
+		uint8_t GetActiveConnectionsCount() const;
 
 	private:
 		void SendPackets();

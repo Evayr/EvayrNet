@@ -8,6 +8,7 @@ end
 
 ConnectionResponse
 uint8 response
+int16 connectionID
 end
 
 ClientIPAddresses

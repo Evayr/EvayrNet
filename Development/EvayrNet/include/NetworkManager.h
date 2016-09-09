@@ -5,6 +5,7 @@
 
 #include "data\packet\PacketHandler.h"
 #include "socket\UDPSocket.h"
+#include "systems\NetworkSystem.h"
 
 namespace EvayrNet
 {
@@ -37,9 +38,13 @@ namespace EvayrNet
 
 		bool IsConnected() const;
 
+		std::shared_ptr<NetworkSystem> GetNetworkSystem();
+		std::shared_ptr<UDPSocket> GetUDPSocket();
+
 	private:
 		PacketHandler m_PacketHandler;
-		std::unique_ptr<UDPSocket> m_UDPSocket;
+		std::shared_ptr<UDPSocket> m_UDPSocket;
+		std::shared_ptr<NetworkSystem> m_NetworkSystem;
 	};
 
 	extern std::unique_ptr<NetworkManager> g_Network;

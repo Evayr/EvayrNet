@@ -55,6 +55,24 @@
     <Filter Include="Header Files\Socket\Windows">
       <UniqueIdentifier>{5dc8634e-e03c-4be8-a632-dce89f6b40f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Systems">
+      <UniqueIdentifier>{d9f435c2-a5f1-4136-b91f-4ce4a3ac58c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Systems">
+      <UniqueIdentifier>{97540398-ada4-4784-ae22-113b61e320df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Client">
+      <UniqueIdentifier>{2fbd65c9-bd22-4bbc-9430-218836d52637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Server">
+      <UniqueIdentifier>{146260d0-2137-41a3-b7f4-0b18c7b414f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Systems\Client">
+      <UniqueIdentifier>{5ad7f88c-4e2b-47a1-8ba9-2401a3c4cb8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Systems\Server">
+      <UniqueIdentifier>{fd20d801-7b57-4b91-9b26-0dbd00691786}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NetworkManager.h">
@@ -93,6 +111,15 @@
     <ClInclude Include="include\socket\windows\WindowsUDPSocket.h">
       <Filter>Header Files\Socket\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="include\systems\NetworkSystem.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\systems\server\NetworkServer.h">
+      <Filter>Header Files\Systems\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="include\systems\client\NetworkClient.h">
+      <Filter>Header Files\Systems\Client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\NetworkManager.cpp">
@@ -124,6 +151,15 @@
     </ClCompile>
     <ClCompile Include="src\socket\windows\WindowsUDPSocket.cpp">
       <Filter>Source Files\Socket\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\client\NetworkClient.cpp">
+      <Filter>Source Files\Systems\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\NetworkSystem.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\server\NetworkServer.cpp">
+      <Filter>Source Files\Systems\Server</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

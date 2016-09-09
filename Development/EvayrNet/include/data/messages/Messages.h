@@ -74,6 +74,7 @@ public:
 	static uint8_t GetMessageOpcode();
 
 	uint8_t response;
+	int16_t connectionID;
 };
 extern void ConnectionResponse_Receive(const Messages::ConnectionResponse& acMessage);
 

@@ -41,6 +41,11 @@ Processing word: "response"
 New member type="uint8_t" name="response" array="no"
 
 Line
+Processing word: "int16"
+Processing word: "connectionID"
+New member type="int16_t" name="connectionID" array="no"
+
+Line
 Processing word: "end"
 End message
 

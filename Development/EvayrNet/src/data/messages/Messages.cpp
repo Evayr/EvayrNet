@@ -101,12 +101,14 @@ void ConnectionResponse::Serialize(EvayrNet::DataStreamWriter aWriter)
 
 	// Serialize member variables
 	aWriter.Write(response);
+	aWriter.Write(connectionID);
 }
 
 void ConnectionResponse::Deserialize(EvayrNet::DataStreamReader aReader)
 {
 	// Deserialize member variables
 	aReader.Read(response);
+	aReader.Read(connectionID);
 
 	// Notify receiver that a message has been processed
 	ConnectionResponse_Receive(*this);
@@ -114,7 +116,7 @@ void ConnectionResponse::Deserialize(EvayrNet::DataStreamReader aReader)
 
 uint16_t ConnectionResponse::GetMessageSize()
 {
-	return 2;
+	return 4;
 }
 
 uint8_t ConnectionResponse::GetMessageOpcode()

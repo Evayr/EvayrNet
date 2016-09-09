@@ -14,6 +14,8 @@ UDPSocket::UDPSocket()
 	, m_ClockPerTickRecv(0)
 	, m_SendClock(clock())
 	, m_RecvClock(clock())
+
+	, m_PacketHandler(PacketHandler())
 {
 }
 

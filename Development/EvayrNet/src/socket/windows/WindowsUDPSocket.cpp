@@ -4,8 +4,9 @@
 
 using namespace EvayrNet;
 
-WindowsUDPSocket::WindowsUDPSocket(uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv)
+WindowsUDPSocket::WindowsUDPSocket(const PacketHandler& acPacketHandler, uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv)
 {
+	m_PacketHandler = acPacketHandler;
 	SetTickRates(aTickRateSend, aTickRateRecv);
 
 	// Start WinSock
@@ -20,7 +21,7 @@ WindowsUDPSocket::WindowsUDPSocket(uint16_t aPort, uint8_t aTickRateSend, uint8_
 	m_Socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (m_Socket == INVALID_SOCKET)
 	{
-		throw std::system_error(WSAGetLastError(), std::system_category(), "Error opening socket");
+		throw std::system_error(WSAGetLastError(), std::system_category(), "Error opening socket.");
 	}
 
 	// Bind socket to port
@@ -42,7 +43,7 @@ void WindowsUDPSocket::Bind(uint16_t aPort)
 	int32_t result = bind(m_Socket, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
 	if (result < 0)
 	{
-		throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to bind the socket");
+		throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to bind the socket.");
 	}
 }
 
@@ -50,7 +51,7 @@ void WindowsUDPSocket::Send()
 {
 	for (size_t i = 0; i < m_Connections.size(); ++i)
 	{
-		// Process IP Address
+		// Prepare outgoing IP Address
 		sockaddr_in address;
 		IPAddress ip = m_Connections[i].GetIPAddress();
 
@@ -67,7 +68,7 @@ void WindowsUDPSocket::Send()
 			int32_t result = sendto(m_Socket, m_Connections[i].GetPacket(j)->GetData(), m_Connections[i].GetPacket(j)->GetDataSize(), 0, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
 			if (result < 0)
 			{
-				throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to sendto");
+				throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to send data.");
 			}
 		}
 	}
@@ -75,7 +76,21 @@ void WindowsUDPSocket::Send()
 
 void WindowsUDPSocket::Receive()
 {
+	char buffer[Packet::kMaxPacketSize];
 
+	// Receive data
+	sockaddr_in from;
+	int size = sizeof(from);
+	int32_t length = recvfrom(m_Socket, buffer, Packet::kMaxPacketSize, 0, reinterpret_cast<SOCKADDR*>(&from), &size);
+	if (length < 0)
+	{
+		throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to receive data.");
+	}
+
+	// Process the packet
+	Packet packet;
+	packet.SetData(buffer, (uint16_t)length);
+	m_PacketHandler.ProcessPacket(packet);
 }
 
 #endif

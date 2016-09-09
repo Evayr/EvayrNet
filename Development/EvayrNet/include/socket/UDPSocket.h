@@ -5,6 +5,7 @@
 #include <ctime>
 #include <vector>
 
+#include "data\packet\PacketHandler.h"
 #include "data\messages\MessageTypes.h"
 #include "connection\Connection.h"
 
@@ -48,6 +49,9 @@ namespace EvayrNet
 		virtual void Bind(uint16_t aPort) = 0;
 		virtual void Send() = 0;
 		virtual void Receive() = 0;
+
+		// Packet Handler
+		PacketHandler& m_PacketHandler;
 
 		// Connection
 		bool m_Connecting : 1;

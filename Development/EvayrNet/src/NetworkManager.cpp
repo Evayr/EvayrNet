@@ -20,9 +20,9 @@ NetworkManager::~NetworkManager()
 void NetworkManager::CreateSocket()
 {
 #if defined(_WIN64) || defined(_WIN32)
-	m_UDPSocket = std::make_unique<WindowsUDPSocket>(kDefaultPort, kDefaultTickRateSend, kDefaultTickRateRecv);
+	m_UDPSocket = std::make_unique<WindowsUDPSocket>(m_PacketHandler, kDefaultPort, kDefaultTickRateSend, kDefaultTickRateRecv);
 #else
-	// Linux? MacOS?
+	// Linux?
 #endif
 }
 

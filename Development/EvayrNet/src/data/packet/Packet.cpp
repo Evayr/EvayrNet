@@ -58,6 +58,12 @@ void Packet::Decrypt()
 {
 }
 
+void Packet::SetData(const char* aData, uint16_t aLength)
+{
+	m_DataStream.Clear();
+	m_DataStream.CreateWriter().WriteRaw((const uint8_t*)aData, aLength);
+}
+
 const char* Packet::GetData() const
 {
 	return m_DataStream.GetDataStream();

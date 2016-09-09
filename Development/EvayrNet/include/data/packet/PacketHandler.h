@@ -1,6 +1,8 @@
 #ifndef _PACKETHANDLER_H_
 #define _PACKETHANDLER_H_
 
+#include "Packet.h"
+
 namespace EvayrNet
 {
 	class PacketHandler
@@ -9,7 +11,7 @@ namespace EvayrNet
 		PacketHandler();
 		~PacketHandler();
 
-		void ProcessPacket();
+		void ProcessPacket(Packet aPacket);
 
 	private:
 		void ProcessMessage();

@@ -67,6 +67,11 @@ const std::list<std::shared_ptr<Messages::Message>>& Connection::GetCachedMessag
 	return m_CachedMessages;
 }
 
+void Connection::ClearPackets()
+{
+	m_Packets.clear();
+}
+
 int16_t Connection::GetConnectionID() const
 {
 	return m_ConnectionID;

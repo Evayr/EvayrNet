@@ -7,13 +7,14 @@
 #include <winsock2.h>
 
 #include "socket\UDPSocket.h"
+#pragma comment(lib, "Ws2_32.lib")
 
 namespace EvayrNet
 {
 	class WindowsUDPSocket : public UDPSocket
 	{
 	public:
-		WindowsUDPSocket(const PacketHandler& acPacketHandler, uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv);
+		WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv);
 		~WindowsUDPSocket();
 
 	private:

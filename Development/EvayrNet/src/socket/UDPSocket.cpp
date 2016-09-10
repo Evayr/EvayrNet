@@ -6,6 +6,8 @@ UDPSocket::UDPSocket()
 	// Connection
 	: m_Connecting(false)
 	, m_Connected(false)
+	, m_ConnectClock(0)
+	, m_ConnectionAttempts(0)
 	
 	// Tick rates
 	, m_TickRateSend(0)
@@ -15,7 +17,7 @@ UDPSocket::UDPSocket()
 	, m_SendClock(clock())
 	, m_RecvClock(clock())
 
-	, m_PacketHandler(PacketHandler())
+	, m_pPacketHandler(nullptr)
 {
 }
 
@@ -25,7 +27,21 @@ UDPSocket::~UDPSocket()
 
 void UDPSocket::ConnectTo(const char* apIP, uint16_t aPort)
 {
-	
+	m_Connections.clear();
+
+	IPAddress ip;
+	ip.m_Address = apIP;
+	ip.m_Port = aPort;
+
+	m_Connections.push_back(Connection(ip, 0));
+
+	m_Connected = false;
+	m_Connecting = true;
+
+	m_ConnectionAttempts = 0;
+	m_ConnectClock = clock();
+
+	printf("Connecting to %s:%i...\n", ip.m_Address.c_str(), aPort);
 }
 
 void UDPSocket::Disconnect()
@@ -38,6 +54,7 @@ void UDPSocket::Disconnect()
 
 void UDPSocket::Update()
 {
+	Connect();
 	ReceivePackets();
 	UpdateConnections();
 	SendPackets();
@@ -118,10 +135,34 @@ uint8_t EvayrNet::UDPSocket::GetActiveConnectionsCount() const
 	return count;
 }
 
+void UDPSocket::Connect()
+{
+	if (!m_Connecting || m_Connected) return;
+
+	if (clock() - m_ConnectClock < kRetryConnectInterval) return;
+	m_ConnectClock = clock();
+
+	auto pRequest = std::make_shared<Messages::ConnectionRequest>();
+	AddMessage(pRequest, Messages::EMessageType::MESSAGE_UNRELIABLE, 0);
+
+	m_ConnectionAttempts += 1;
+
+	if (m_ConnectionAttempts >= kConnectionAttempts)
+	{
+		printf("Failed to connect to the server: No response.\n");
+		m_Connected = false;
+		m_Connecting = false;
+	}
+	else
+	{
+		printf("No response yet, retrying...\n");
+	}
+}
+
 void UDPSocket::SendPackets()
 {
 	// Tick rate
-	if (!m_Connected) return;
+	if (!m_Connected && !m_Connecting) return;
 	if (clock() - m_SendClock < m_ClockPerTickSend) return;
 	m_SendClock = clock();
 

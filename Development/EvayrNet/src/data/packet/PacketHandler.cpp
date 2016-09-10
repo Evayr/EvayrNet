@@ -1,5 +1,6 @@
 #include "data\packet\PacketHandler.h"
 #include "data\stream\DataStream.h"
+#include "data\messages\Messages.h"
 
 using namespace EvayrNet;
 
@@ -45,19 +46,19 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 void PacketHandler::RegisterDefaultMessages()
 {
 	// Message Header
-	std::shared_ptr<Messages::MessageHeader> pHeader = std::make_shared<Messages::MessageHeader>();
+	auto pHeader = std::make_shared<Messages::MessageHeader>();
 	RegisterMessage(pHeader.get(), pHeader->GetMessageOpcode());
 
 	// Connection Request
-	std::shared_ptr<Messages::ConnectionRequest> pConnectionRequest = std::make_shared<Messages::ConnectionRequest>();
+	auto pConnectionRequest = std::make_shared<Messages::ConnectionRequest>();
 	RegisterMessage(pConnectionRequest.get(), pConnectionRequest->GetMessageOpcode());
 
 	// Connection Response
-	std::shared_ptr<Messages::ConnectionResponse> pConnectionResponse = std::make_shared<Messages::ConnectionResponse>();
+	auto pConnectionResponse = std::make_shared<Messages::ConnectionResponse>();
 	RegisterMessage(pConnectionResponse.get(), pConnectionResponse->GetMessageOpcode());
 
 	// Client IP Addresses
-	std::shared_ptr<Messages::ClientIPAddresses> pClientIPAddresses = std::make_shared<Messages::ClientIPAddresses>();
+	auto pClientIPAddresses = std::make_shared<Messages::ClientIPAddresses>();
 	RegisterMessage(pClientIPAddresses.get(), pClientIPAddresses->GetMessageOpcode());
 }
 
@@ -65,6 +66,6 @@ void PacketHandler::ProcessMessage()
 {
 }
 
-void MessageHeader_Receive(const Messages::MessageHeader& acMessage)
+void EvayrNet::Messages::MessageHeader_Receive(const Messages::MessageHeader& acMessage)
 {
 }

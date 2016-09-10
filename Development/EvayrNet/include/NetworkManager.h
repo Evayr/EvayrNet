@@ -18,10 +18,9 @@ namespace EvayrNet
 			kDefaultTickRateSend = 60,
 			kDefaultTickRateRecv = 60,
 		};
-		NetworkManager();
-		~NetworkManager();
 
-		void CreateSocket();
+		NetworkManager(bool aIsServer);
+		~NetworkManager();
 
 		void Update();
 
@@ -42,12 +41,14 @@ namespace EvayrNet
 		std::shared_ptr<UDPSocket> GetUDPSocket();
 
 	private:
+		void CreateSocket();
+
 		PacketHandler m_PacketHandler;
-		std::shared_ptr<UDPSocket> m_UDPSocket;
-		std::shared_ptr<NetworkSystem> m_NetworkSystem;
+		std::shared_ptr<UDPSocket> m_pUDPSocket;
+		std::shared_ptr<NetworkSystem> m_pNetworkSystem;
 	};
 
-	extern std::unique_ptr<NetworkManager> g_Network;
+	extern NetworkManager* g_Network;
 }
 
 #endif

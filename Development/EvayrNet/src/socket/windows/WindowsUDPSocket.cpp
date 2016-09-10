@@ -4,9 +4,9 @@
 
 using namespace EvayrNet;
 
-WindowsUDPSocket::WindowsUDPSocket(const PacketHandler& acPacketHandler, uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv)
+WindowsUDPSocket::WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv)
 {
-	m_PacketHandler = acPacketHandler;
+	m_pPacketHandler = apPacketHandler;
 	SetTickRates(aTickRateSend, aTickRateRecv);
 
 	// Start WinSock
@@ -33,7 +33,7 @@ WindowsUDPSocket::~WindowsUDPSocket()
 	WSACleanup();
 }
 
-void WindowsUDPSocket::Bind(uint16_t aPort)
+void EvayrNet::WindowsUDPSocket::Bind(uint16_t aPort)
 {
 	sockaddr_in address;
 	address.sin_family = AF_INET;
@@ -70,6 +70,9 @@ void WindowsUDPSocket::Send()
 			{
 				throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to send data.");
 			}
+			printf("Sending %i bytes of data...\n", m_Connections[i].GetPacket(j)->GetDataSize());
+
+			m_Connections[i].ClearPackets();
 		}
 	}
 }
@@ -96,7 +99,7 @@ void WindowsUDPSocket::Receive()
 	// Process the packet
 	Packet packet;
 	packet.SetData(buffer, (uint16_t)length);
-	m_PacketHandler.ProcessPacket(packet);
+	m_pPacketHandler->ProcessPacket(packet);
 }
 
 #endif

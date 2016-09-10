@@ -28,6 +28,7 @@ namespace EvayrNet
 		uint8_t GetPacketCount() const;
 		std::shared_ptr<Packet> GetPacket(uint8_t aPacketID);
 		const std::list<std::shared_ptr<Messages::Message>>& GetCachedMessages();
+		void ClearPackets();
 
 		int16_t GetConnectionID() const;
 

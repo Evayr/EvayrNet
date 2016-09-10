@@ -14,6 +14,11 @@ namespace EvayrNet
 	class UDPSocket
 	{
 	public:
+		enum
+		{
+			kRetryConnectInterval = 500,
+			kConnectionAttempts = 10,
+		};
 		UDPSocket();
 		~UDPSocket();
 
@@ -33,6 +38,7 @@ namespace EvayrNet
 		uint8_t GetActiveConnectionsCount() const;
 
 	private:
+		void Connect();
 		void SendPackets();
 		void ReceivePackets();
 		void UpdateConnections();
@@ -49,17 +55,19 @@ namespace EvayrNet
 		clock_t m_SendClock;
 		clock_t m_RecvClock;
 
+		// Connecting
+		clock_t m_ConnectClock;
+		uint8_t m_ConnectionAttempts;
+		bool m_Connecting : 1;
+		bool m_Connected : 1;
+
 	protected:
 		virtual void Bind(uint16_t aPort) = 0;
 		virtual void Send() = 0;
 		virtual void Receive() = 0;
 
 		// Packet Handler
-		PacketHandler& m_PacketHandler;
-
-		// Connection
-		bool m_Connecting : 1;
-		bool m_Connected : 1;
+		PacketHandler* m_pPacketHandler;
 
 		// Connections
 		std::vector<Connection> m_Connections;

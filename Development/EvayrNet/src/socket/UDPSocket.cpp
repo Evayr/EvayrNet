@@ -16,6 +16,9 @@ UDPSocket::UDPSocket()
 	, m_ClockPerTickSend(0)
 	, m_SendClock(clock())
 
+	// Socket configuration
+	, m_Port(0)
+
 	, m_pPacketHandler(nullptr)
 {
 }
@@ -49,6 +52,7 @@ void UDPSocket::Disconnect()
 {
 	if (m_Connected)
 	{
+		printf("Saying goodbye to everyone\n");
 		// Send disconnect message to everyone
 		auto pDisconnectMessage = std::make_shared<Messages::Disconnect>();
 		pDisconnectMessage->connectionID = m_ConnectionID;
@@ -137,6 +141,11 @@ bool UDPSocket::IsConnected() const
 	return m_Connected;
 }
 
+void UDPSocket::AddConnection(IPAddress aIPAddress, bool aSendHeartbeats)
+{
+	m_Connections.push_back(Connection(aIPAddress, int16_t(m_Connections.size()), false));
+}
+
 Connection* UDPSocket::GetNewestConnection()
 {
 	if (m_Connections.size() > 0)
@@ -185,6 +194,11 @@ void UDPSocket::SetConnectionID(int16_t aVal)
 int16_t UDPSocket::GetConnectionID() const
 {
 	return m_ConnectionID;
+}
+
+uint16_t EvayrNet::UDPSocket::GetPort() const
+{
+	return m_Port;
 }
 
 void UDPSocket::Connect()

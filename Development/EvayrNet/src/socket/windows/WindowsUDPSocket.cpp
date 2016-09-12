@@ -7,6 +7,7 @@ using namespace EvayrNet;
 WindowsUDPSocket::WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPort, uint8_t aTickRate)
 {
 	m_pPacketHandler = apPacketHandler;
+	m_Port = aPort;
 	SetTickRate(aTickRate);
 
 	// Start WinSock

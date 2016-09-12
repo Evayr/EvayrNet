@@ -8,10 +8,18 @@ using namespace EvayrNet;
 NetworkServer::NetworkServer()
 	: m_MaxPlayerCount(kDefaultMaxPlayers)
 {
+	// Assign ourselves as server
+	m_IsServer = true;
+
 	// Set server connection ID - is always 0
 	g_Network->GetUDPSocket()->SetConnectionID(0);
 
-	m_IsServer = true;
+	// Add ourselves as connection ID 0
+	IPAddress ip;
+	ip.m_Address = "127.0.0.1";
+	ip.m_Port = g_Network->GetUDPSocket()->GetPort();
+	g_Network->GetUDPSocket()->AddConnection(ip);
+	g_Network->GetUDPSocket()->GetNewestConnection()->SetActive(false);
 }
 
 NetworkServer::~NetworkServer()
@@ -58,6 +66,7 @@ void NetworkServer::OnDisconnect(const Messages::Disconnect& acMessage)
 	
 	if (pConnection)
 	{
+		printf("Connection ID %i has disconnected.\n", acMessage.connectionID);
 		pConnection->SetActive(false);
 	}
 }

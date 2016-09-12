@@ -46,6 +46,9 @@ namespace EvayrNet
 
 		uint32_t GetPing() const;
 
+		void EnableAutoHeartbeat();
+		void DisableAutoHeartbeat();
+
 	private:
 		void UpdateLifetime();
 		void SendHeartbeat(bool aForceSend);

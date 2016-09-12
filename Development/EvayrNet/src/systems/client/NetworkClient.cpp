@@ -25,7 +25,7 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 	{
 		case Messages::EConnectionResult::RESULT_SUCCESS:
 		{
-			printf("Successfully connected to the server!\n");
+			printf("Successfully connected to the server! Our Connection ID is: %i\n", acMessage.connectionID);
 			g_Network->GetUDPSocket()->SetConnected(true);
 			g_Network->GetUDPSocket()->SetConnectionID(acMessage.connectionID);
 			break;

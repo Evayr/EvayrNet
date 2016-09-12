@@ -125,6 +125,16 @@ uint32_t EvayrNet::Connection::GetPing() const
 	return m_Ping;
 }
 
+void Connection::EnableAutoHeartbeat()
+{
+	m_SendAutoHeartbeats = true;
+}
+
+void Connection::DisableAutoHeartbeat()
+{
+	m_SendAutoHeartbeats = false;
+}
+
 bool Connection::HeartbeatIsNewer(uint8_t aID)
 {
 	if (m_HeartbeatID < aID)

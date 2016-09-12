@@ -38,12 +38,15 @@ namespace EvayrNet
 		void SetConnected(bool aVal);
 		bool IsConnected() const;
 
+		void AddConnection(IPAddress aIPAddress, bool aSendHeartbeats = false);
 		Connection* GetNewestConnection();
 		Connection* GetConnection(int16_t aID);
 		uint8_t GetActiveConnectionsCount() const;
 
 		void SetConnectionID(int16_t aVal);
 		int16_t GetConnectionID() const;
+
+		uint16_t GetPort() const;
 
 	private:
 		void Connect();
@@ -82,6 +85,9 @@ namespace EvayrNet
 		std::list<clock_t> m_PPSOut; // Packets per second - outgoing
 		std::list<clock_t> m_PPSIn; // Packets per second - incoming
 		std::list<clock_t> m_PPSLost; // Packets per second - lost
+
+		// Socket
+		uint16_t m_Port;
 	};
 }
 

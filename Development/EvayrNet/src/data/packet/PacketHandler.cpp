@@ -33,33 +33,38 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 
 	Messages::MessageHeader header;
 
-	for (;;)
+	uint16_t packetSize = aPacket.GetDataSize();
+	uint16_t dataRead = 0;
+
+	while(dataRead < packetSize)
 	{
 		header.Deserialize(reader);
 		if (header.size == 0) break;
 
 		Messages::Message* pMessage = m_Messages[header.opcode];
 		pMessage->Deserialize(reader);
+
+		dataRead += header.size;
 	}
 }
 
 void PacketHandler::RegisterDefaultMessages()
 {
 	// Message Header
-	auto pHeader = std::make_shared<Messages::MessageHeader>();
-	RegisterMessage(pHeader.get(), pHeader->GetMessageOpcode());
+	auto pHeader = new Messages::MessageHeader();
+	RegisterMessage(pHeader, pHeader->GetMessageOpcode());
 
 	// Connection Request
-	auto pConnectionRequest = std::make_shared<Messages::ConnectionRequest>();
-	RegisterMessage(pConnectionRequest.get(), pConnectionRequest->GetMessageOpcode());
+	auto pConnectionRequest = new Messages::ConnectionRequest();
+	RegisterMessage(pConnectionRequest, pConnectionRequest->GetMessageOpcode());
 
 	// Connection Response
-	auto pConnectionResponse = std::make_shared<Messages::ConnectionResponse>();
-	RegisterMessage(pConnectionResponse.get(), pConnectionResponse->GetMessageOpcode());
+	auto pConnectionResponse = new Messages::ConnectionResponse();
+	RegisterMessage(pConnectionResponse, pConnectionResponse->GetMessageOpcode());
 
 	// Client IP Addresses
-	auto pClientIPAddresses = std::make_shared<Messages::ClientIPAddresses>();
-	RegisterMessage(pClientIPAddresses.get(), pClientIPAddresses->GetMessageOpcode());
+	auto pClientIPAddresses = new Messages::ClientIPAddresses();
+	RegisterMessage(pClientIPAddresses, pClientIPAddresses->GetMessageOpcode());
 }
 
 void PacketHandler::ProcessMessage()

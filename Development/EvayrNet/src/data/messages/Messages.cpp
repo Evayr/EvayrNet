@@ -19,7 +19,7 @@ MessageHeader::~MessageHeader()
 {
 }
 
-void MessageHeader::Serialize(EvayrNet::DataStreamWriter aWriter)
+void MessageHeader::Serialize(EvayrNet::DataStreamWriter& aWriter)
 {
 	// Serialize header
 	aWriter.Write(GetMessageSize()); // message size
@@ -30,7 +30,7 @@ void MessageHeader::Serialize(EvayrNet::DataStreamWriter aWriter)
 	aWriter.Write(opcode);
 }
 
-void MessageHeader::Deserialize(EvayrNet::DataStreamReader aReader)
+void MessageHeader::Deserialize(EvayrNet::DataStreamReader& aReader)
 {
 	// Deserialize member variables
 	aReader.Read(size);
@@ -42,7 +42,7 @@ void MessageHeader::Deserialize(EvayrNet::DataStreamReader aReader)
 
 uint16_t MessageHeader::GetMessageSize()
 {
-	return 4;
+	return 6;
 }
 
 uint8_t MessageHeader::GetMessageOpcode()
@@ -58,7 +58,7 @@ ConnectionRequest::~ConnectionRequest()
 {
 }
 
-void ConnectionRequest::Serialize(EvayrNet::DataStreamWriter aWriter)
+void ConnectionRequest::Serialize(EvayrNet::DataStreamWriter& aWriter)
 {
 	// Serialize header
 	aWriter.Write(GetMessageSize()); // message size
@@ -67,7 +67,7 @@ void ConnectionRequest::Serialize(EvayrNet::DataStreamWriter aWriter)
 	// Serialize member variables
 }
 
-void ConnectionRequest::Deserialize(EvayrNet::DataStreamReader aReader)
+void ConnectionRequest::Deserialize(EvayrNet::DataStreamReader& aReader)
 {
 	// Deserialize member variables
 
@@ -77,7 +77,7 @@ void ConnectionRequest::Deserialize(EvayrNet::DataStreamReader aReader)
 
 uint16_t ConnectionRequest::GetMessageSize()
 {
-	return 1;
+	return 3;
 }
 
 uint8_t ConnectionRequest::GetMessageOpcode()
@@ -93,7 +93,7 @@ ConnectionResponse::~ConnectionResponse()
 {
 }
 
-void ConnectionResponse::Serialize(EvayrNet::DataStreamWriter aWriter)
+void ConnectionResponse::Serialize(EvayrNet::DataStreamWriter& aWriter)
 {
 	// Serialize header
 	aWriter.Write(GetMessageSize()); // message size
@@ -104,7 +104,7 @@ void ConnectionResponse::Serialize(EvayrNet::DataStreamWriter aWriter)
 	aWriter.Write(connectionID);
 }
 
-void ConnectionResponse::Deserialize(EvayrNet::DataStreamReader aReader)
+void ConnectionResponse::Deserialize(EvayrNet::DataStreamReader& aReader)
 {
 	// Deserialize member variables
 	aReader.Read(response);
@@ -116,7 +116,7 @@ void ConnectionResponse::Deserialize(EvayrNet::DataStreamReader aReader)
 
 uint16_t ConnectionResponse::GetMessageSize()
 {
-	return 4;
+	return 6;
 }
 
 uint8_t ConnectionResponse::GetMessageOpcode()
@@ -132,7 +132,7 @@ ClientIPAddresses::~ClientIPAddresses()
 {
 }
 
-void ClientIPAddresses::Serialize(EvayrNet::DataStreamWriter aWriter)
+void ClientIPAddresses::Serialize(EvayrNet::DataStreamWriter& aWriter)
 {
 	// Serialize header
 	aWriter.Write(GetMessageSize()); // message size
@@ -140,31 +140,31 @@ void ClientIPAddresses::Serialize(EvayrNet::DataStreamWriter aWriter)
 
 	// Serialize member variables
 	aWriter.Write(uint16_t(ips.size()));
-	for (uint16_t i = 0; i < ips.size(); ++i)
+	for (size_t i = 0; i < ips.size(); ++i)
 	{
 		aWriter.Write(ips[i]);
 	}
 
 	aWriter.Write(uint16_t(ports.size()));
-	for (uint16_t i = 0; i < ports.size(); ++i)
+	for (size_t i = 0; i < ports.size(); ++i)
 	{
 		aWriter.Write(ports[i]);
 	}
 
 	aWriter.Write(uint16_t(connectionIds.size()));
-	for (uint16_t i = 0; i < connectionIds.size(); ++i)
+	for (size_t i = 0; i < connectionIds.size(); ++i)
 	{
 		aWriter.Write(connectionIds[i]);
 	}
 
 }
 
-void ClientIPAddresses::Deserialize(EvayrNet::DataStreamReader aReader)
+void ClientIPAddresses::Deserialize(EvayrNet::DataStreamReader& aReader)
 {
 	// Deserialize member variables
 	uint16_t ips_count = 0;
 	aReader.Read(ips_count);
-	for (uint16_t i = 0; i < ips_count; ++i)
+	for (size_t i = 0; i < ips_count; ++i)
 	{
 		std::string t;
 		aReader.Read(t);
@@ -172,7 +172,7 @@ void ClientIPAddresses::Deserialize(EvayrNet::DataStreamReader aReader)
 	}
 	uint16_t ports_count = 0;
 	aReader.Read(ports_count);
-	for (uint16_t i = 0; i < ports_count; ++i)
+	for (size_t i = 0; i < ports_count; ++i)
 	{
 		uint16_t t;
 		aReader.Read(t);
@@ -180,7 +180,7 @@ void ClientIPAddresses::Deserialize(EvayrNet::DataStreamReader aReader)
 	}
 	uint16_t connectionIds_count = 0;
 	aReader.Read(connectionIds_count);
-	for (uint16_t i = 0; i < connectionIds_count; ++i)
+	for (size_t i = 0; i < connectionIds_count; ++i)
 	{
 		uint16_t t;
 		aReader.Read(t);
@@ -194,11 +194,11 @@ void ClientIPAddresses::Deserialize(EvayrNet::DataStreamReader aReader)
 uint16_t ClientIPAddresses::GetMessageSize()
 {
 	uint16_t arraysSize = 0;
-	for (uint32_t i = 0; i < ips.size(); ++i) { arraysSize += ips[i].size() + 2; }
-	arraysSize += ports.size() * 2;
-	arraysSize += connectionIds.size() * 2;
+	for (size_t i = 0; i < ips.size(); ++i) {arraysSize += uint16_t(ips[i].size() + 2); }
+	arraysSize += uint16_t(ports.size()) * 2;
+	arraysSize += uint16_t(connectionIds.size()) * 2;
 
-	return 1 + arraysSize;
+	return 3 + arraysSize;
 }
 
 uint8_t ClientIPAddresses::GetMessageOpcode()

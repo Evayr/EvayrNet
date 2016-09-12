@@ -16,7 +16,7 @@ tab = "\t"
 packetSize = 0
 stringLines = []
 stringPreLines = []
-headerSize = 1
+headerSize = 3
 messageOpcode = 0
 
 serializationLines = []
@@ -70,10 +70,11 @@ def StartHeaderFile():
 	h.write(tab + "Message::Message();\n")
 	h.write(tab + "Message::~Message();\n")
 	h.write(newline)
-	h.write(tab + "virtual void Serialize(EvayrNet::DataStreamWriter aWriter){}\n")
-	h.write(tab + "virtual void Deserialize(EvayrNet::DataStreamReader aReader){}\n")
+	h.write(tab + "virtual void Serialize(EvayrNet::DataStreamWriter& aWriter){}\n")
+	h.write(tab + "virtual void Deserialize(EvayrNet::DataStreamReader& aReader){}\n")
 	h.write(newline)
 	h.write(tab + "virtual uint16_t GetMessageSize(){ return 0; }\n")
+	h.write(tab + "virtual uint8_t GetMessageOpcode(){ return 0; }\n")
 	h.write("};\n")
 	h.write(newline)
 	return
@@ -124,11 +125,11 @@ def StartMessage(messageName, opcode):
 	h.write(tab + messageName + "();" + newline)
 	h.write(tab + "~" + messageName + "();\n")
 	h.write(newline)	
-	h.write(tab + "void Serialize(EvayrNet::DataStreamWriter aWriter);\n")
-	h.write(tab + "void Deserialize(EvayrNet::DataStreamReader aReader);\n")
+	h.write(tab + "void Serialize(EvayrNet::DataStreamWriter& aWriter);\n")
+	h.write(tab + "void Deserialize(EvayrNet::DataStreamReader& aReader);\n")
 	h.write(newline)
 	h.write(tab + "uint16_t GetMessageSize();\n")
-	h.write(tab + "static uint8_t GetMessageOpcode();\n")
+	h.write(tab + "uint8_t GetMessageOpcode();\n")
 	h.write(newline)
 	
 	global cpp
@@ -148,7 +149,7 @@ def StartMessage(messageName, opcode):
 def EndMessage(messageName, opcode):
 	global cpp
 	
-	cpp.write("void " + messageName + "::Serialize(EvayrNet::DataStreamWriter aWriter)\n")
+	cpp.write("void " + messageName + "::Serialize(EvayrNet::DataStreamWriter& aWriter)\n")
 	cpp.write("{\n")
 	cpp.write(tab + "// Serialize header\n")
 	cpp.write(tab + "aWriter.Write(GetMessageSize()); // message size\n")
@@ -162,7 +163,7 @@ def EndMessage(messageName, opcode):
 	cpp.write("}\n")
 	cpp.write(newline)
 	
-	cpp.write("void " + messageName + "::Deserialize(EvayrNet::DataStreamReader aReader)\n")
+	cpp.write("void " + messageName + "::Deserialize(EvayrNet::DataStreamReader& aReader)\n")
 	cpp.write("{\n")
 	cpp.write(tab + "// Deserialize member variables\n")
 	di = 0;
@@ -230,27 +231,27 @@ def WriteMember(type, name, isArray):
 		if isArray == "no":
 			packetSize += 1
 		else:
-			stringPreLines.append(tab + "arraysSize += " + name + ".size() * " + str(1) + semicolon + newline)
+			stringPreLines.append(tab + "arraysSize += uint16_t(" + name + ".size()) * " + str(1) + semicolon + newline)
 	elif type == "int16" or type == "uint16" or type == "short":
 		if isArray == "no":
 			packetSize += 2
 		else:
-			stringPreLines.append(tab + "arraysSize += " + name + ".size() * " + str(2) + semicolon + newline)
+			stringPreLines.append(tab + "arraysSize += uint16_t(" + name + ".size()) * " + str(2) + semicolon + newline)
 	elif type == "float" or type == "uint32" or type == "int32" or type == "long":
 		if isArray == "no":
 			packetSize += 4
 		else:
-			stringPreLines.append(tab + "arraysSize += " + name + ".size() * " + str(4) + semicolon + newline)
+			stringPreLines.append(tab + "arraysSize += uint16_t(" + name + ".size()) * " + str(4) + semicolon + newline)
 	elif type == "uint64" or type == "int64" or type == "double":
 		if isArray == "no":
 			packetSize += 8
 		else:
-			stringPreLines.append(tab + "arraysSize += " + name + ".size() * " + str(8) + semicolon + newline)
+			stringPreLines.append(tab + "arraysSize += uint16_t(" + name + ".size()) * " + str(8) + semicolon + newline)
 	elif type == "string":
 		if isArray == "no":
 			stringLines.append(" + " + name + ".size() + 2")
 		else:
-			stringPreLines.append(tab + "for (uint32_t i = 0; i < " + name + ".size(); ++i) { arraysSize += " + name + "[i].size() + 2; }\n")
+			stringPreLines.append(tab + "for (size_t i = 0; i < " + name + ".size(); ++i) {arraysSize += uint16_t(" + name + "[i].size() + 2); }\n")
 	return
 
 Log("Started")
@@ -310,14 +311,14 @@ if f:
 						
 					else:
 						serializationLines.append(tab + "aWriter.Write(uint16_t(" + name + ".size()));\n")
-						serializationLines.append(tab + "for (uint16_t i = 0; i < " + name + ".size(); ++i)\n")
+						serializationLines.append(tab + "for (size_t i = 0; i < " + name + ".size(); ++i)\n")
 						serializationLines.append(tab + "{\n")
 						serializationLines.append(tabs(2) + "aWriter.Write(" + name + "[i]);\n")
 						serializationLines.append(tab + "}\n\n")
 						
 						deserializationLines.append(tab + "uint16_t " + name + "_count = 0;\n")
 						deserializationLines.append(tab + "aReader.Read(" + name + "_count);\n")
-						deserializationLines.append(tab + "for (uint16_t i = 0; i < " + name + "_count; ++i)\n")
+						deserializationLines.append(tab + "for (size_t i = 0; i < " + name + "_count; ++i)\n")
 						deserializationLines.append(tab + "{\n")
 						deserializationLines.append(tabs(2) + "" + GetCPPType(type) + " t;\n")
 						deserializationLines.append(tabs(2) + "aReader.Read(t);\n")

@@ -7,13 +7,14 @@ using namespace EvayrNet;
 
 EvayrNet::NetworkManager* EvayrNet::g_Network = nullptr;
 
-NetworkManager::NetworkManager(bool aIsServer)
+NetworkManager::NetworkManager(uint16_t aPort, bool aIsServer)
 {
-	CreateSocket();
+	CreateSocket(aPort);
 
 	if (aIsServer)
 	{
 		m_pNetworkSystem = std::make_unique<NetworkServer>();
+		m_pUDPSocket->SetConnected(true);
 	}
 	else
 	{
@@ -31,10 +32,10 @@ NetworkManager::~NetworkManager()
 	}
 }
 
-void NetworkManager::CreateSocket()
+void NetworkManager::CreateSocket(uint16_t aPort)
 {
 #if defined(_WIN64) || defined(_WIN32)
-	m_pUDPSocket = std::make_unique<WindowsUDPSocket>(&m_PacketHandler, kDefaultPort, kDefaultTickRateSend, kDefaultTickRateRecv);
+	m_pUDPSocket = std::make_unique<WindowsUDPSocket>(&m_PacketHandler, aPort, kDefaultTickRateSend, kDefaultTickRateRecv);
 #else
 	// Linux?
 #endif

@@ -24,12 +24,16 @@ WindowsUDPSocket::WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPor
 		throw std::system_error(WSAGetLastError(), std::system_category(), "Error opening socket.");
 	}
 
+	u_long mode = 1; // non-blocking mode
+	ioctlsocket(m_Socket, FIONBIO, &mode);
+
 	// Bind socket to port
 	Bind(aPort);
 }
 
 WindowsUDPSocket::~WindowsUDPSocket()
 {
+	closesocket(m_Socket);
 	WSACleanup();
 }
 
@@ -44,6 +48,10 @@ void EvayrNet::WindowsUDPSocket::Bind(uint16_t aPort)
 	if (result < 0)
 	{
 		throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to bind the socket.");
+	}
+	else
+	{
+		printf("Successfully bound the socket to port %i.\n", aPort);
 	}
 }
 
@@ -79,27 +87,32 @@ void WindowsUDPSocket::Send()
 
 void WindowsUDPSocket::Receive()
 {
-	char buffer[Packet::kMaxPacketSize];
+	sockaddr_in addrOther;
+	uint8_t buffer[Packet::kMaxPacketSize];
+	int32_t otherLen = sizeof(addrOther);
 
-	// Receive data
-	sockaddr_in from;
-	int size = sizeof(from);
-	int32_t length = recvfrom(m_Socket, buffer, Packet::kMaxPacketSize, 0, reinterpret_cast<SOCKADDR*>(&from), &size);
-	if (length < 0)
+	int32_t messageSize = (int32_t)recvfrom(m_Socket, (char*)buffer, Packet::kMaxPacketSize, 0, (struct sockaddr*)&addrOther, &otherLen);
+
+	if (messageSize == SOCKET_ERROR) // -1
 	{
-		throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to receive data.");
+		//printf("Error receiving data! Error code: %d\n", WSAGetLastError());
 	}
 
-	// Process IP Address
-	IPAddress ip;
-	ip.m_Address = from.sin_addr.s_addr;
-	ip.m_Port = uint16_t(from.sin_port);
-	CheckConnection(ip);
+	else if (messageSize > 0)
+	{
+		printf("Received %i bytes of data...\n", messageSize);
 
-	// Process the packet
-	Packet packet;
-	packet.SetData(buffer, (uint16_t)length);
-	m_pPacketHandler->ProcessPacket(packet);
+		// Process IP Address
+		IPAddress ip;
+		ip.m_Address = addrOther.sin_addr.s_addr;
+		ip.m_Port = uint16_t(addrOther.sin_port);
+		CheckConnection(ip);
+
+		// Process the packet
+		Packet packet;
+		packet.SetData((char*)buffer, (uint16_t)messageSize);
+		m_pPacketHandler->ProcessPacket(packet);
+	}
 }
 
 #endif

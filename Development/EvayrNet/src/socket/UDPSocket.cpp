@@ -102,17 +102,21 @@ int16_t UDPSocket::CheckConnection(IPAddress aIPAddress)
 	return connectionID;
 }
 
+void UDPSocket::SetConnected(bool aVal)
+{
+	m_Connected = aVal;
+}
+
 bool UDPSocket::IsConnected() const
 {
 	return m_Connected;
 }
 
-std::shared_ptr<Connection> UDPSocket::GetNewestConnection()
+Connection* UDPSocket::GetNewestConnection()
 {
 	if (m_Connections.size() > 0)
 	{
-		std::shared_ptr<Connection> pConnection = std::make_shared<Connection>(m_Connections[m_Connections.size() - 1]);
-		return std::shared_ptr<Connection>();
+		return &m_Connections[m_Connections.size() - 1];
 	}
 	else
 	{
@@ -174,8 +178,8 @@ void UDPSocket::ReceivePackets()
 {
 	// Tick rate
 	if (!m_Connected) return;
-	if (clock() - m_SendClock < m_ClockPerTickSend) return;
-	m_SendClock = clock();
+	if (clock() - m_RecvClock < m_ClockPerTickSend) return;
+	m_RecvClock = clock();
 
 	// Receive data
 	Receive();

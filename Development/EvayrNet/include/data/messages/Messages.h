@@ -23,10 +23,11 @@ public:
 	Message::Message();
 	Message::~Message();
 
-	virtual void Serialize(EvayrNet::DataStreamWriter aWriter){}
-	virtual void Deserialize(EvayrNet::DataStreamReader aReader){}
+	virtual void Serialize(EvayrNet::DataStreamWriter& aWriter){}
+	virtual void Deserialize(EvayrNet::DataStreamReader& aReader){}
 
 	virtual uint16_t GetMessageSize(){ return 0; }
+	virtual uint8_t GetMessageOpcode(){ return 0; }
 };
 
 class MessageHeader : public Message
@@ -35,11 +36,11 @@ public:
 	MessageHeader();
 	~MessageHeader();
 
-	void Serialize(EvayrNet::DataStreamWriter aWriter);
-	void Deserialize(EvayrNet::DataStreamReader aReader);
+	void Serialize(EvayrNet::DataStreamWriter& aWriter);
+	void Deserialize(EvayrNet::DataStreamReader& aReader);
 
 	uint16_t GetMessageSize();
-	static uint8_t GetMessageOpcode();
+	uint8_t GetMessageOpcode();
 
 	uint16_t size;
 	uint8_t opcode;
@@ -52,11 +53,11 @@ public:
 	ConnectionRequest();
 	~ConnectionRequest();
 
-	void Serialize(EvayrNet::DataStreamWriter aWriter);
-	void Deserialize(EvayrNet::DataStreamReader aReader);
+	void Serialize(EvayrNet::DataStreamWriter& aWriter);
+	void Deserialize(EvayrNet::DataStreamReader& aReader);
 
 	uint16_t GetMessageSize();
-	static uint8_t GetMessageOpcode();
+	uint8_t GetMessageOpcode();
 
 };
 extern void ConnectionRequest_Receive(const Messages::ConnectionRequest& acMessage);
@@ -67,11 +68,11 @@ public:
 	ConnectionResponse();
 	~ConnectionResponse();
 
-	void Serialize(EvayrNet::DataStreamWriter aWriter);
-	void Deserialize(EvayrNet::DataStreamReader aReader);
+	void Serialize(EvayrNet::DataStreamWriter& aWriter);
+	void Deserialize(EvayrNet::DataStreamReader& aReader);
 
 	uint16_t GetMessageSize();
-	static uint8_t GetMessageOpcode();
+	uint8_t GetMessageOpcode();
 
 	uint8_t response;
 	int16_t connectionID;
@@ -84,11 +85,11 @@ public:
 	ClientIPAddresses();
 	~ClientIPAddresses();
 
-	void Serialize(EvayrNet::DataStreamWriter aWriter);
-	void Deserialize(EvayrNet::DataStreamReader aReader);
+	void Serialize(EvayrNet::DataStreamWriter& aWriter);
+	void Deserialize(EvayrNet::DataStreamReader& aReader);
 
 	uint16_t GetMessageSize();
-	static uint8_t GetMessageOpcode();
+	uint8_t GetMessageOpcode();
 
 	std::vector<std::string> ips;
 	std::vector<uint16_t> ports;

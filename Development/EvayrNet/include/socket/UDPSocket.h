@@ -16,7 +16,7 @@ namespace EvayrNet
 	public:
 		enum
 		{
-			kRetryConnectInterval = 500,
+			kRetryConnectInterval = 1000,
 			kConnectionAttempts = 10,
 		};
 		UDPSocket();
@@ -33,8 +33,9 @@ namespace EvayrNet
 
 		int16_t CheckConnection(IPAddress aIPAddress);
 
+		void SetConnected(bool aVal);
 		bool IsConnected() const;
-		std::shared_ptr<Connection> GetNewestConnection();
+		Connection* GetNewestConnection();
 		uint8_t GetActiveConnectionsCount() const;
 
 	private:

@@ -124,6 +124,47 @@ uint8_t ConnectionResponse::GetMessageOpcode()
 	return 2;
 }
 
+Heartbeat::Heartbeat()
+{
+}
+
+Heartbeat::~Heartbeat()
+{
+}
+
+void Heartbeat::Serialize(EvayrNet::DataStreamWriter& aWriter)
+{
+	// Serialize header
+	aWriter.Write(GetMessageSize()); // message size
+	aWriter.Write(uint8_t(3)); // opcode
+
+	// Serialize member variables
+	aWriter.Write(connectionID);
+	aWriter.Write(id);
+	aWriter.Write(ping);
+}
+
+void Heartbeat::Deserialize(EvayrNet::DataStreamReader& aReader)
+{
+	// Deserialize member variables
+	aReader.Read(connectionID);
+	aReader.Read(id);
+	aReader.Read(ping);
+
+	// Notify receiver that a message has been processed
+	Heartbeat_Receive(*this);
+}
+
+uint16_t Heartbeat::GetMessageSize()
+{
+	return 10;
+}
+
+uint8_t Heartbeat::GetMessageOpcode()
+{
+	return 3;
+}
+
 ClientIPAddresses::ClientIPAddresses()
 {
 }
@@ -136,7 +177,7 @@ void ClientIPAddresses::Serialize(EvayrNet::DataStreamWriter& aWriter)
 {
 	// Serialize header
 	aWriter.Write(GetMessageSize()); // message size
-	aWriter.Write(uint8_t(3)); // opcode
+	aWriter.Write(uint8_t(4)); // opcode
 
 	// Serialize member variables
 	aWriter.Write(uint16_t(ips.size()));
@@ -203,7 +244,7 @@ uint16_t ClientIPAddresses::GetMessageSize()
 
 uint8_t ClientIPAddresses::GetMessageOpcode()
 {
-	return 3;
+	return 4;
 }
 
 } // namespace Messages

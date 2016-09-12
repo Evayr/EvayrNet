@@ -1,11 +1,17 @@
 #include "connection\Connection.h"
+#include "NetworkManager.h"
 
 using namespace EvayrNet;
 
-Connection::Connection(IPAddress aIPAddress, int16_t aConnectionID)
+Connection::Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats)
 	: m_IPAddress(aIPAddress)
 	, m_ConnectionID(aConnectionID)
 	, m_Active(true)
+	, m_HeartbeatID(0)
+	, m_HeartbeatClock(clock())
+	, m_PingClock(clock())
+	, m_Ping(0)
+	, m_SendAutoHeartbeats(aSendHeartbeats)
 {
 }
 
@@ -15,7 +21,7 @@ Connection::~Connection()
 
 void Connection::Update()
 {
-	SendHeartbeat();
+	UpdateLifetime();
 }
 
 void Connection::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messages::EMessageType aType)
@@ -37,8 +43,6 @@ void Connection::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messag
 	{
 		m_CachedMessages.push_back(apMessage);
 	}
-
-	printf("Connection::AddMessage | Packet messages: %i\n", m_Packets[m_Packets.size() - 1]->GetMessageCount());
 }
 
 void Connection::AddCachedMessage()
@@ -89,9 +93,103 @@ bool Connection::IsActive() const
 	return m_Active;
 }
 
-void Connection::SendHeartbeat()
+void Connection::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 {
-	// if it's time to send a heartbeat
-	// make a heartbeat message
-	// add to packet
+	if (HeartbeatIsNewer(acMessage.id))
+	{
+		m_HeartbeatID = acMessage.id;
+
+		// Update ping
+		if (g_Network->GetNetworkSystem()->IsServer())
+		{
+			m_Ping = uint32_t(clock() - m_PingClock);	
+		}
+		else
+		{
+			m_PingClock = clock();
+			m_Ping = acMessage.ping;
+		}
+
+		//printf("Heartbeat with ID %i received. Our ping is %u\n", acMessage.id, m_Ping);
+
+		// Reply to the heartbeat if we're a client
+		if (!g_Network->GetNetworkSystem()->IsServer())
+		{
+			SendHeartbeat(true);
+		}
+	}
+}
+
+uint32_t EvayrNet::Connection::GetPing() const
+{
+	return m_Ping;
+}
+
+bool Connection::HeartbeatIsNewer(uint8_t aID)
+{
+	if (m_HeartbeatID < aID)
+	{
+		if (aID - m_HeartbeatID <= UINT8_MAX / 2)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (m_HeartbeatID - aID >= UINT8_MAX / 2)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+void Connection::UpdateLifetime()
+{
+	if (!m_Active) return;
+
+	if (clock() - m_PingClock > kConnectionTimout)
+	{
+		printf("Connection with ID %i has timed out.\n", m_ConnectionID);
+		m_Packets.clear();
+		m_Active = false;
+	}
+
+	if (m_SendAutoHeartbeats)
+	{
+		SendHeartbeat(false);
+	}
+}
+
+void Connection::SendHeartbeat(bool aForceSend)
+{
+	// If it's time to send a heartbeat
+	if (!aForceSend)
+	{
+		if (clock() - m_HeartbeatClock < kHeartbeatInterval) return;
+		m_HeartbeatClock = clock();
+	}
+
+	// Make a heartbeat message
+	m_HeartbeatID++;
+	auto pHeartbeat = std::make_shared<Messages::Heartbeat>();
+	pHeartbeat->id = m_HeartbeatID;
+	pHeartbeat->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
+	pHeartbeat->ping = m_Ping;
+
+	// Reset ping timer
+	if (g_Network->GetNetworkSystem()->IsServer())
+	{
+		m_PingClock = clock();
+	}
+
+	// Add to packet
+	g_Network->Send(pHeartbeat, m_ConnectionID);
 }

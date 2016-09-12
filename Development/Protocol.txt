@@ -11,6 +11,12 @@ uint8 response
 int16 connectionID
 end
 
+Heartbeat
+int16 connectionID
+uint8 id
+uint32 ping
+end
+
 ClientIPAddresses
 string ips array
 uint16 ports array

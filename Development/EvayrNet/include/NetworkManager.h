@@ -32,7 +32,7 @@ namespace EvayrNet
 
 		void RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode);
 
-		void SetTickRates(uint8_t aSendTickRate = kDefaultTickRate);
+		void SetTickRate(uint8_t aSendTickRate = kDefaultTickRate);
 
 		bool IsConnected() const;
 

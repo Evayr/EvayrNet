@@ -7,6 +7,7 @@ using namespace EvayrNet;
 
 NetworkClient::NetworkClient()
 {
+	m_IsServer = false;
 }
 
 NetworkClient::~NetworkClient()
@@ -26,6 +27,7 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 		{
 			printf("Successfully connected to the server!\n");
 			g_Network->GetUDPSocket()->SetConnected(true);
+			g_Network->GetUDPSocket()->SetConnectionID(acMessage.connectionID);
 			break;
 		}
 

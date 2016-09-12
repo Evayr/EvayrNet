@@ -9,6 +9,8 @@ EvayrNet::NetworkManager* EvayrNet::g_Network = nullptr;
 
 NetworkManager::NetworkManager(uint16_t aPort, bool aIsServer)
 {
+	g_Network = this;
+
 	CreateSocket(aPort);
 
 	if (aIsServer)
@@ -20,8 +22,6 @@ NetworkManager::NetworkManager(uint16_t aPort, bool aIsServer)
 	{
 		m_pNetworkSystem = std::make_unique<NetworkClient>();
 	}
-
-	g_Network = this;
 }
 
 NetworkManager::~NetworkManager()
@@ -76,9 +76,9 @@ void NetworkManager::RegisterMessage(Messages::Message* apMessage, uint8_t aOpCo
 	m_PacketHandler.RegisterMessage(apMessage, aOpCode);
 }
 
-void NetworkManager::SetTickRates(uint8_t aSendTickRate)
+void NetworkManager::SetTickRate(uint8_t aSendTickRate)
 {
-	m_pUDPSocket->SetTickRates(aSendTickRate);
+	m_pUDPSocket->SetTickRate(aSendTickRate);
 }
 
 bool NetworkManager::IsConnected() const

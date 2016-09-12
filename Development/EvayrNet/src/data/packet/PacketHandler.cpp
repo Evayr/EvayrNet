@@ -62,6 +62,10 @@ void PacketHandler::RegisterDefaultMessages()
 	auto pConnectionResponse = new Messages::ConnectionResponse();
 	RegisterMessage(pConnectionResponse, pConnectionResponse->GetMessageOpcode());
 
+	// Heartbeat
+	auto pHeartbeat = new Messages::Heartbeat();
+	RegisterMessage(pHeartbeat, pHeartbeat->GetMessageOpcode());
+
 	// Client IP Addresses
 	auto pClientIPAddresses = new Messages::ClientIPAddresses();
 	RegisterMessage(pClientIPAddresses, pClientIPAddresses->GetMessageOpcode());

@@ -29,20 +29,27 @@ namespace EvayrNet
 
 		void AddMessage(std::shared_ptr<Messages::Message> apMessage, Messages::EMessageType aType, int16_t aConnectionID = -1);
 
-		void SetTickRates(uint8_t aTickRateSend);
+		void SetTickRate(uint8_t aTickRateSend);
 
-		int16_t CheckConnection(IPAddress aIPAddress);
+		void ProcessHeartbeat(const Messages::Heartbeat& acMessage);
+
+		int16_t ProcessIPAddress(IPAddress aIPAddress);
 
 		void SetConnected(bool aVal);
 		bool IsConnected() const;
 		Connection* GetNewestConnection();
 		uint8_t GetActiveConnectionsCount() const;
 
+		void SetConnectionID(int16_t aVal);
+		int16_t GetConnectionID() const;
+
 	private:
 		void Connect();
 		void SendPackets();
 		void ReceivePackets();
 		void UpdateConnections();
+		void UpdateStatistics();
+		void RemoveTimeIfExceedsAmount(std::list<clock_t>* apList, float aTime = 1000.f);
 
 		void AddConnection(IPAddress aIPAddress, int16_t aConnectionID);
 
@@ -54,6 +61,7 @@ namespace EvayrNet
 		// Connecting
 		clock_t m_ConnectClock;
 		uint8_t m_ConnectionAttempts;
+		int16_t m_ConnectionID; // Our connection ID where others can recognize us from
 		bool m_Connecting : 1;
 		bool m_Connected : 1;
 
@@ -67,6 +75,11 @@ namespace EvayrNet
 
 		// Connections
 		std::vector<Connection> m_Connections;
+
+		// Debugging info
+		std::list<clock_t> m_PPSOut; // Packets per second - outgoing
+		std::list<clock_t> m_PPSIn; // Packets per second - incoming
+		std::list<clock_t> m_PPSLost; // Packets per second - lost
 	};
 }
 

@@ -8,6 +8,10 @@ using namespace EvayrNet;
 NetworkServer::NetworkServer()
 	: m_MaxPlayerCount(kDefaultMaxPlayers)
 {
+	// Set server connection ID - is always 0
+	g_Network->GetUDPSocket()->SetConnectionID(0);
+
+	m_IsServer = true;
 }
 
 NetworkServer::~NetworkServer()
@@ -24,6 +28,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 	if (g_Network->GetUDPSocket()->GetActiveConnectionsCount() < m_MaxPlayerCount)
 	{
 		printf("Client accepted\n");
+
 		// Welcome the client
 		std::shared_ptr<Messages::ConnectionResponse> pMessage = std::make_shared<Messages::ConnectionResponse>();
 		pMessage->response = Messages::EConnectionResult::RESULT_SUCCESS;

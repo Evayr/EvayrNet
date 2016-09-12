@@ -4,10 +4,10 @@
 
 using namespace EvayrNet;
 
-WindowsUDPSocket::WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPort, uint8_t aTickRateSend)
+WindowsUDPSocket::WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPort, uint8_t aTickRate)
 {
 	m_pPacketHandler = apPacketHandler;
-	SetTickRates(aTickRateSend);
+	SetTickRate(aTickRate);
 
 	// Start WinSock
 	WSAData data;
@@ -79,10 +79,12 @@ void WindowsUDPSocket::Send()
 				throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to send data.");
 			}
 
-			printf("Sent %i bytes of data to %s:%i\n", m_Connections[i].GetPacket(j)->GetMessagesSize(), m_Connections[i].GetIPAddress().m_Address.c_str(), m_Connections[i].GetIPAddress().m_Port);
+			//printf("Sent %i bytes of data to %s:%i\n", m_Connections[i].GetPacket(j)->GetMessagesSize(), m_Connections[i].GetIPAddress().m_Address.c_str(), m_Connections[i].GetIPAddress().m_Port);
 
-			m_Connections[i].ClearPackets();
+			m_PPSOut.push_back(clock());
 		}
+
+		m_Connections[i].ClearPackets();
 	}
 }
 
@@ -101,18 +103,19 @@ void WindowsUDPSocket::Receive()
 
 	else if (messageSize > 0)
 	{
-		printf("Received %i bytes of data...\n", messageSize);
+		//printf("Received %i bytes of data...\n", messageSize);
 
 		// Process IP Address
 		IPAddress ip;
 		ip.m_Address = inet_ntoa(addrOther.sin_addr);
 		ip.m_Port = uint16_t(htons(addrOther.sin_port));
-		CheckConnection(ip);
+		ProcessIPAddress(ip);
 
 		// Process the packet
 		Packet packet;
 		packet.SetData((char*)buffer, (uint16_t)messageSize);
 		m_pPacketHandler->ProcessPacket(packet);
+		m_PPSIn.push_back(clock());
 	}
 }
 

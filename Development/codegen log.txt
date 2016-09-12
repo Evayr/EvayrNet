@@ -51,6 +51,30 @@ End message
 
 Line
 Line
+Processing word: "Heartbeat"
+New message name="Heartbeat"
+
+Line
+Processing word: "int16"
+Processing word: "connectionID"
+New member type="int16_t" name="connectionID" array="no"
+
+Line
+Processing word: "uint8"
+Processing word: "id"
+New member type="uint8_t" name="id" array="no"
+
+Line
+Processing word: "uint32"
+Processing word: "ping"
+New member type="uint32_t" name="ping" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
 Processing word: "ClientIPAddresses"
 New message name="ClientIPAddresses"
 

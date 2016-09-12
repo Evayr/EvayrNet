@@ -79,6 +79,24 @@ public:
 };
 extern void ConnectionResponse_Receive(const Messages::ConnectionResponse& acMessage);
 
+class Heartbeat : public Message
+{
+public:
+	Heartbeat();
+	~Heartbeat();
+
+	void Serialize(EvayrNet::DataStreamWriter& aWriter);
+	void Deserialize(EvayrNet::DataStreamReader& aReader);
+
+	uint16_t GetMessageSize();
+	uint8_t GetMessageOpcode();
+
+	int16_t connectionID;
+	uint8_t id;
+	uint32_t ping;
+};
+extern void Heartbeat_Receive(const Messages::Heartbeat& acMessage);
+
 class ClientIPAddresses : public Message
 {
 public:

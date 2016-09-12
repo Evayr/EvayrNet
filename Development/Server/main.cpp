@@ -4,6 +4,7 @@
 int main()
 {
 	EvayrNet::NetworkManager net(7777, true);
+	net.SetTickRate(144);
 
 	for (;;)
 	{

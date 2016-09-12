@@ -11,6 +11,11 @@ NetworkSystem::~NetworkSystem()
 {
 }
 
+bool NetworkSystem::IsServer() const
+{
+	return m_IsServer;
+}
+
 // Handles
 void EvayrNet::Messages::ConnectionRequest_Receive(const Messages::ConnectionRequest& acMessage)
 {

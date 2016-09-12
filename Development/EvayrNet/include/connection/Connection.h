@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <list>
+#include <ctime>
 
 #include "connection\IPAddress.h"
 #include "data\messages\Messages.h"
@@ -15,7 +16,13 @@ namespace EvayrNet
 	class Connection
 	{
 	public:
-		Connection(IPAddress aIPAddress, int16_t aConnectionID);
+		enum
+		{
+			kHeartbeatInterval = 250, // ms
+			kConnectionTimout = 5000, // ms
+		};
+
+		Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats);
 		~Connection();
 
 		void Update();
@@ -35,16 +42,32 @@ namespace EvayrNet
 		void SetActive(bool aVal);
 		bool IsActive() const;
 
+		void ProcessHeartbeat(const Messages::Heartbeat& acMessage);
+
+		uint32_t GetPing() const;
+
 	private:
-		void SendHeartbeat();
+		void UpdateLifetime();
+		void SendHeartbeat(bool aForceSend);
+		bool HeartbeatIsNewer(uint8_t aID);
 
-		IPAddress m_IPAddress;
-
+		// Sending / receiving data
 		std::vector<std::shared_ptr<Packet>> m_Packets;
 		std::list<std::shared_ptr<Messages::Message>> m_CachedMessages;
 
+		// Connectivity
+		IPAddress m_IPAddress;
 		int16_t m_ConnectionID;
-		bool m_Active;
+		bool m_Active : 1;
+
+		// Heartbeat
+		bool m_SendAutoHeartbeats : 1;
+		clock_t m_HeartbeatClock;
+		uint8_t m_HeartbeatID;
+
+		// Ping
+		clock_t m_PingClock;
+		uint32_t m_Ping;
 	};
 }
 

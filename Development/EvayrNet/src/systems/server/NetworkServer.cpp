@@ -23,6 +23,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 {
 	if (g_Network->GetUDPSocket()->GetActiveConnectionsCount() < m_MaxPlayerCount)
 	{
+		printf("Client accepted\n");
 		// Welcome the client
 		std::shared_ptr<Messages::ConnectionResponse> pMessage = std::make_shared<Messages::ConnectionResponse>();
 		pMessage->response = Messages::EConnectionResult::RESULT_SUCCESS;
@@ -31,6 +32,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 	}
 	else
 	{
+		printf("Client refused\n");
 		// Refuse the client
 		std::shared_ptr<Messages::ConnectionResponse> pMessage = std::make_shared<Messages::ConnectionResponse>();
 		pMessage->response = Messages::EConnectionResult::RESULT_SERVER_FULL;

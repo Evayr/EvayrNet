@@ -34,9 +34,9 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 	Messages::MessageHeader header;
 
 	uint16_t packetSize = aPacket.GetDataSize();
-	uint16_t dataRead = 0;
+	uint16_t bytesRead = 0;
 
-	while(dataRead < packetSize)
+	while(bytesRead < packetSize)
 	{
 		header.Deserialize(reader);
 		if (header.size == 0) break;
@@ -44,7 +44,7 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 		Messages::Message* pMessage = m_Messages[header.opcode];
 		pMessage->Deserialize(reader);
 
-		dataRead += header.size;
+		bytesRead += header.size;
 	}
 }
 

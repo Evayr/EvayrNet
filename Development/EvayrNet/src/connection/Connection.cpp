@@ -25,7 +25,7 @@ void Connection::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messag
 	{
 		m_Packets.push_back(std::make_shared<Packet>());
 	}
-	else if (m_Packets[m_Packets.size() - 1]->GetDataSize() + apMessage->GetMessageSize() >= Packet::kMaxPacketSize)
+	else if (m_Packets[m_Packets.size() - 1]->GetMessagesSize() + apMessage->GetMessageSize() >= Packet::kMaxPacketSize)
 	{
 		m_Packets.push_back(std::make_shared<Packet>());
 	}
@@ -37,6 +37,8 @@ void Connection::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messag
 	{
 		m_CachedMessages.push_back(apMessage);
 	}
+
+	printf("Connection::AddMessage | Packet messages: %i\n", m_Packets[m_Packets.size() - 1]->GetMessageCount());
 }
 
 void Connection::AddCachedMessage()

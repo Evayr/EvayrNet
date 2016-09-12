@@ -33,7 +33,9 @@ namespace EvayrNet
 
 		void SetData(const char* aData, uint16_t aLength);
 		const char* GetData() const;
+		uint16_t GetMessagesSize() const;
 		uint16_t GetDataSize() const;
+		uint32_t GetMessageCount() const;
 
 		DataStream& GetDataStream();
 

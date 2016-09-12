@@ -73,12 +73,13 @@ void WindowsUDPSocket::Send()
 			m_Connections[i].GetPacket(j)->Serialize();
 			m_Connections[i].GetPacket(j)->Encrypt();
 
-			int32_t result = sendto(m_Socket, m_Connections[i].GetPacket(j)->GetData(), m_Connections[i].GetPacket(j)->GetDataSize(), 0, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
+			int32_t result = sendto(m_Socket, m_Connections[i].GetPacket(j)->GetData(), m_Connections[i].GetPacket(j)->GetMessagesSize(), 0, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
 			if (result < 0)
 			{
 				throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to send data.");
 			}
-			printf("Sending %i bytes of data...\n", m_Connections[i].GetPacket(j)->GetDataSize());
+
+			printf("Sent %i bytes of data to %s:%i\n", m_Connections[i].GetPacket(j)->GetMessagesSize(), m_Connections[i].GetIPAddress().m_Address.c_str(), m_Connections[i].GetIPAddress().m_Port);
 
 			m_Connections[i].ClearPackets();
 		}
@@ -104,8 +105,8 @@ void WindowsUDPSocket::Receive()
 
 		// Process IP Address
 		IPAddress ip;
-		ip.m_Address = addrOther.sin_addr.s_addr;
-		ip.m_Port = uint16_t(addrOther.sin_port);
+		ip.m_Address = inet_ntoa(addrOther.sin_addr);
+		ip.m_Port = uint16_t(htons(addrOther.sin_port));
 		CheckConnection(ip);
 
 		// Process the packet

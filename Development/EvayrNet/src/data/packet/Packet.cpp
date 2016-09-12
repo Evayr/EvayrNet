@@ -69,7 +69,7 @@ const char* Packet::GetData() const
 	return m_DataStream.GetDataStream();
 }
 
-uint16_t Packet::GetDataSize() const
+uint16_t EvayrNet::Packet::GetMessagesSize() const
 {
 	uint16_t size = 0;
 
@@ -79,6 +79,16 @@ uint16_t Packet::GetDataSize() const
 	}
 
 	return size;
+}
+
+uint16_t Packet::GetDataSize() const
+{
+	return m_DataStream.GetDataStreamSize();
+}
+
+uint32_t Packet::GetMessageCount() const
+{
+	return uint32_t(m_Messages.size());
 }
 
 DataStream& Packet::GetDataStream()

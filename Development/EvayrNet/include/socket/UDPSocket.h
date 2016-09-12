@@ -16,8 +16,8 @@ namespace EvayrNet
 	public:
 		enum
 		{
-			kRetryConnectInterval = 1000,
-			kConnectionAttempts = 10,
+			kRetryConnectInterval = 3000,
+			kConnectionAttempts = 3,
 		};
 		UDPSocket();
 		~UDPSocket();

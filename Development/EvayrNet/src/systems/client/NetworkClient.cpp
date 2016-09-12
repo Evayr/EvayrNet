@@ -24,11 +24,15 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 	{
 		case Messages::EConnectionResult::RESULT_SUCCESS:
 		{
+			printf("Successfully connected to the server!\n");
+			g_Network->GetUDPSocket()->SetConnected(true);
 			break;
 		}
 
 		case Messages::EConnectionResult::RESULT_SERVER_FULL:
 		{
+			printf("Failed to connect to the server: Server is full!\n");
+			g_Network->GetUDPSocket()->SetConnected(false);
 			break;
 		}
 	}

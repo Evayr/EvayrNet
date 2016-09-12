@@ -36,7 +36,7 @@ void UDPSocket::ConnectTo(const char* apIP, uint16_t aPort)
 	m_Connecting = true;
 
 	m_ConnectionAttempts = 0;
-	m_ConnectClock = clock();
+	m_ConnectClock = clock() - kRetryConnectInterval; // Start right away
 
 	printf("Connecting to %s:%i...\n", ip.m_Address.c_str(), aPort);
 }
@@ -99,6 +99,7 @@ int16_t UDPSocket::CheckConnection(IPAddress aIPAddress)
 void UDPSocket::SetConnected(bool aVal)
 {
 	m_Connected = aVal;
+	m_Connecting = false;
 }
 
 bool UDPSocket::IsConnected() const

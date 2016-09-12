@@ -6,11 +6,20 @@ using namespace EvayrNet;
 
 PacketHandler::PacketHandler()
 {
+	memset(&m_Messages[0], 0, sizeof(m_Messages));
 	RegisterDefaultMessages();
 }
 
 PacketHandler::~PacketHandler()
 {
+	for (uint8_t i = 0; i < UINT8_MAX; ++i)
+	{
+		if (m_Messages[i])
+		{
+			delete m_Messages[i];
+			m_Messages[i] = nullptr;
+		}
+	}
 }
 
 void PacketHandler::RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode)
@@ -65,6 +74,10 @@ void PacketHandler::RegisterDefaultMessages()
 	// Heartbeat
 	auto pHeartbeat = new Messages::Heartbeat();
 	RegisterMessage(pHeartbeat, pHeartbeat->GetMessageOpcode());
+
+	// Disconnect
+	auto pDisconnect = new Messages::Disconnect();
+	RegisterMessage(pDisconnect, pDisconnect->GetMessageOpcode());
 
 	// Client IP Addresses
 	auto pClientIPAddresses = new Messages::ClientIPAddresses();

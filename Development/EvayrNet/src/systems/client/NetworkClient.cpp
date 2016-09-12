@@ -40,6 +40,49 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 	}
 }
 
+void NetworkClient::OnDisconnect(const Messages::Disconnect& acMessage)
+{
+	switch (acMessage.reason)
+	{
+		case Messages::EDisconnectReason::REASON_QUIT:
+		{
+			printf("Connection ID %i has quit\n", acMessage.connectionID);
+			break;
+		}
+
+		case Messages::EDisconnectReason::REASON_TIMED_OUT:
+		{
+			printf("Connection ID %i has been timed out.\n", acMessage.connectionID);
+			break;
+		}
+
+		case Messages::EDisconnectReason::REASON_KICKED:
+		{
+			printf("Connection ID %i has been kicked.\n", acMessage.connectionID);
+			break;
+		}
+
+		case Messages::EDisconnectReason::REASON_BANNED:
+		{
+			printf("Connection ID %i has been banned.\n", acMessage.connectionID);
+			break;
+		}
+	}
+
+	if (acMessage.connectionID == 0)
+	{
+		g_Network->GetUDPSocket()->SetConnected(false);
+	}
+	else
+	{
+		Connection* pConnection = g_Network->GetUDPSocket()->GetConnection(acMessage.connectionID);
+		if (pConnection)
+		{
+			pConnection->SetActive(false);
+		}
+	}
+}
+
 void NetworkClient::OnClientIPAddresses(const Messages::ClientIPAddresses& acMessage)
 {
 

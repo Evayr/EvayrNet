@@ -21,6 +21,7 @@ namespace EvayrNet
 	private:
 		void OnConnectionRequest(const Messages::ConnectionRequest& acMessage);
 		void OnConnectionResponse(const Messages::ConnectionResponse& acMessage);
+		void OnDisconnect(const Messages::Disconnect& acMessage);
 		void OnClientIPAddresses(const Messages::ClientIPAddresses& acMessage);
 
 		uint8_t m_MaxPlayerCount;

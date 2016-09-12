@@ -75,6 +75,25 @@ End message
 
 Line
 Line
+Processing word: "Disconnect"
+New message name="Disconnect"
+
+Line
+Processing word: "uint8"
+Processing word: "reason"
+New member type="uint8_t" name="reason" array="no"
+
+Line
+Processing word: "int16"
+Processing word: "connectionID"
+New member type="int16_t" name="connectionID" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
 Processing word: "ClientIPAddresses"
 New message name="ClientIPAddresses"
 

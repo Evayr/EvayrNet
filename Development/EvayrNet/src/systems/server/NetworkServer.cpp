@@ -52,6 +52,16 @@ void NetworkServer::OnConnectionResponse(const Messages::ConnectionResponse& acM
 	// Server doesn't need to process a connection response
 }
 
+void NetworkServer::OnDisconnect(const Messages::Disconnect& acMessage)
+{
+	Connection* pConnection = g_Network->GetUDPSocket()->GetConnection(acMessage.connectionID);
+	
+	if (pConnection)
+	{
+		pConnection->SetActive(false);
+	}
+}
+
 void NetworkServer::OnClientIPAddresses(const Messages::ClientIPAddresses& acMessage)
 {
 	// Server doesn't need to process this

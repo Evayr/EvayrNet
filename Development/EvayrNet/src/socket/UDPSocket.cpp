@@ -49,6 +49,13 @@ void UDPSocket::Disconnect()
 {
 	if (m_Connected)
 	{
+		// Send disconnect message to everyone
+		auto pDisconnectMessage = std::make_shared<Messages::Disconnect>();
+		pDisconnectMessage->connectionID = m_ConnectionID;
+		pDisconnectMessage->reason = Messages::EDisconnectReason::REASON_QUIT;
+		AddMessage(pDisconnectMessage, Messages::EMessageType::MESSAGE_UNRELIABLE);
+		SendPackets(true);
+
 		m_Connected = false;
 	}
 }
@@ -118,6 +125,11 @@ void UDPSocket::SetConnected(bool aVal)
 {
 	m_Connected = aVal;
 	m_Connecting = false;
+
+	if (!m_Connected)
+	{
+		m_Connections.clear();
+	}
 }
 
 bool UDPSocket::IsConnected() const
@@ -135,6 +147,19 @@ Connection* UDPSocket::GetNewestConnection()
 	{
 		return nullptr;
 	}
+}
+
+Connection* UDPSocket::GetConnection(int16_t aID)
+{
+	for (size_t i = 0; i < m_Connections.size(); ++i)
+	{
+		if (m_Connections[i].GetConnectionID() == aID)
+		{
+			return &m_Connections[i];
+		}
+	}
+
+	return nullptr;
 }
 
 uint8_t UDPSocket::GetActiveConnectionsCount() const
@@ -186,12 +211,16 @@ void UDPSocket::Connect()
 	}
 }
 
-void UDPSocket::SendPackets()
+void UDPSocket::SendPackets(bool aForceSend)
 {
-	// Tick rate
 	if (!m_Connected && !m_Connecting) return;
-	if (clock() - m_SendClock < m_ClockPerTickSend) return;
-	m_SendClock = clock();
+
+	// Tick rate
+	if (!aForceSend)
+	{
+		if (clock() - m_SendClock < m_ClockPerTickSend) return;
+		m_SendClock = clock();
+	}
 
 	// Send packets
 	Send();

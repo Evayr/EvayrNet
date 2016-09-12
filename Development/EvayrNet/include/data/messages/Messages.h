@@ -97,6 +97,23 @@ public:
 };
 extern void Heartbeat_Receive(const Messages::Heartbeat& acMessage);
 
+class Disconnect : public Message
+{
+public:
+	Disconnect();
+	~Disconnect();
+
+	void Serialize(EvayrNet::DataStreamWriter& aWriter);
+	void Deserialize(EvayrNet::DataStreamReader& aReader);
+
+	uint16_t GetMessageSize();
+	uint8_t GetMessageOpcode();
+
+	uint8_t reason;
+	int16_t connectionID;
+};
+extern void Disconnect_Receive(const Messages::Disconnect& acMessage);
+
 class ClientIPAddresses : public Message
 {
 public:

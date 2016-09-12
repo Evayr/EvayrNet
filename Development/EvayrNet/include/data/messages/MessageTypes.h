@@ -12,9 +12,9 @@ namespace EvayrNet
 			MESSAGE_SEQUENCED = 2,
 		};
 
-		enum EConnectionRemovedReason
+		enum EDisconnectReason
 		{
-			REASON_DISCONNECTED = 0,
+			REASON_QUIT = 0,
 			REASON_TIMED_OUT = 1,
 			REASON_KICKED = 2,
 			REASON_BANNED = 3,

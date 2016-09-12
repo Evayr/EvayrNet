@@ -37,7 +37,9 @@ namespace EvayrNet
 
 		void SetConnected(bool aVal);
 		bool IsConnected() const;
+
 		Connection* GetNewestConnection();
+		Connection* GetConnection(int16_t aID);
 		uint8_t GetActiveConnectionsCount() const;
 
 		void SetConnectionID(int16_t aVal);
@@ -45,7 +47,7 @@ namespace EvayrNet
 
 	private:
 		void Connect();
-		void SendPackets();
+		void SendPackets(bool aForceSend = false);
 		void ReceivePackets();
 		void UpdateConnections();
 		void UpdateStatistics();

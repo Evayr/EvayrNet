@@ -27,6 +27,11 @@ void EvayrNet::Messages::ConnectionResponse_Receive(const Messages::ConnectionRe
 	g_Network->GetNetworkSystem()->OnConnectionResponse(acMessage);
 }
 
+void EvayrNet::Messages::Disconnect_Receive(const Messages::Disconnect& acMessage)
+{
+	g_Network->GetNetworkSystem()->OnDisconnect(acMessage);
+}
+
 void EvayrNet::Messages::ClientIPAddresses_Receive(const Messages::ClientIPAddresses& acMessage)
 {
 	g_Network->GetNetworkSystem()->OnClientIPAddresses(acMessage);

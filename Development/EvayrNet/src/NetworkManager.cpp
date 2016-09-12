@@ -35,7 +35,7 @@ NetworkManager::~NetworkManager()
 void NetworkManager::CreateSocket(uint16_t aPort)
 {
 #if defined(_WIN64) || defined(_WIN32)
-	m_pUDPSocket = std::make_unique<WindowsUDPSocket>(&m_PacketHandler, aPort, kDefaultTickRateSend, kDefaultTickRateRecv);
+	m_pUDPSocket = std::make_unique<WindowsUDPSocket>(&m_PacketHandler, aPort, kDefaultTickRate);
 #else
 	// Linux?
 #endif
@@ -76,9 +76,9 @@ void NetworkManager::RegisterMessage(Messages::Message* apMessage, uint8_t aOpCo
 	m_PacketHandler.RegisterMessage(apMessage, aOpCode);
 }
 
-void NetworkManager::SetTickRates(uint8_t aSendTickRate, uint8_t aRecvTickRate)
+void NetworkManager::SetTickRates(uint8_t aSendTickRate)
 {
-	m_pUDPSocket->SetTickRates(aSendTickRate, aRecvTickRate);
+	m_pUDPSocket->SetTickRates(aSendTickRate);
 }
 
 bool NetworkManager::IsConnected() const

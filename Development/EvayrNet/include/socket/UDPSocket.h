@@ -29,7 +29,7 @@ namespace EvayrNet
 
 		void AddMessage(std::shared_ptr<Messages::Message> apMessage, Messages::EMessageType aType, int16_t aConnectionID = -1);
 
-		void SetTickRates(uint8_t aTickRateSend, uint8_t aTickRateRecv);
+		void SetTickRates(uint8_t aTickRateSend);
 
 		int16_t CheckConnection(IPAddress aIPAddress);
 
@@ -48,13 +48,8 @@ namespace EvayrNet
 
 		// Tick rates
 		uint8_t m_TickRateSend;
-		uint8_t m_TickRateRecv;
-
 		clock_t m_ClockPerTickSend;
-		clock_t m_ClockPerTickRecv;
-
 		clock_t m_SendClock;
-		clock_t m_RecvClock;
 
 		// Connecting
 		clock_t m_ConnectClock;

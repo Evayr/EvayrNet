@@ -4,10 +4,10 @@
 
 using namespace EvayrNet;
 
-WindowsUDPSocket::WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPort, uint8_t aTickRateSend, uint8_t aTickRateRecv)
+WindowsUDPSocket::WindowsUDPSocket(PacketHandler* apPacketHandler, uint16_t aPort, uint8_t aTickRateSend)
 {
 	m_pPacketHandler = apPacketHandler;
-	SetTickRates(aTickRateSend, aTickRateRecv);
+	SetTickRates(aTickRateSend);
 
 	// Start WinSock
 	WSAData data;

@@ -14,9 +14,8 @@ namespace EvayrNet
 	public:
 		enum
 		{
-			kDefaultPort = 37475,
-			kDefaultTickRateSend = 60,
-			kDefaultTickRateRecv = 60,
+			kDefaultPort = 12345,
+			kDefaultTickRate = 60, // Hz
 		};
 
 		NetworkManager(uint16_t aPort, bool aIsServer);
@@ -33,7 +32,7 @@ namespace EvayrNet
 
 		void RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode);
 
-		void SetTickRates(uint8_t aSendTickRate = 60, uint8_t aRecvTickRate = 60);
+		void SetTickRates(uint8_t aSendTickRate = kDefaultTickRate);
 
 		bool IsConnected() const;
 

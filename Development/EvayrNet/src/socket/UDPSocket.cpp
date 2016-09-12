@@ -11,11 +11,8 @@ UDPSocket::UDPSocket()
 	
 	// Tick rates
 	, m_TickRateSend(0)
-	, m_TickRateRecv(0)
 	, m_ClockPerTickSend(0)
-	, m_ClockPerTickRecv(0)
 	, m_SendClock(clock())
-	, m_RecvClock(clock())
 
 	, m_pPacketHandler(nullptr)
 {
@@ -75,13 +72,10 @@ void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, Message
 	}
 }
 
-void UDPSocket::SetTickRates(uint8_t aTickRateSend, uint8_t aTickRateRecv)
+void UDPSocket::SetTickRates(uint8_t aTickRateSend)
 {
 	m_TickRateSend = aTickRateSend;
-	m_TickRateRecv = aTickRateRecv;
-
 	m_ClockPerTickSend = clock_t(1000.f / (float)aTickRateSend);
-	m_ClockPerTickRecv = clock_t(1000.f / (float)aTickRateRecv);
 }
 
 int16_t UDPSocket::CheckConnection(IPAddress aIPAddress)
@@ -124,7 +118,7 @@ Connection* UDPSocket::GetNewestConnection()
 	}
 }
 
-uint8_t EvayrNet::UDPSocket::GetActiveConnectionsCount() const
+uint8_t UDPSocket::GetActiveConnectionsCount() const
 {
 	uint8_t count = 0;
 
@@ -177,9 +171,7 @@ void UDPSocket::SendPackets()
 void UDPSocket::ReceivePackets()
 {
 	// Tick rate
-	if (!m_Connected) return;
-	if (clock() - m_RecvClock < m_ClockPerTickSend) return;
-	m_RecvClock = clock();
+	if (!m_Connected && !m_Connecting) return;
 
 	// Receive data
 	Receive();

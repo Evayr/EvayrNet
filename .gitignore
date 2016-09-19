@@ -28,6 +28,11 @@ $RECYCLE.BIN/
 *.pdb
 *.obj
 
+# Bin folders
+Development/EvayrNet/x64/
+Development/Client/x64/
+Development/Server/x64/
+
 # =========================
 # Operating System Files
 # =========================

@@ -28,6 +28,7 @@ $RECYCLE.BIN/
 *.pdb
 *.obj
 *.ilk
+*.cache
 
 # Library generated files
 Messages.h

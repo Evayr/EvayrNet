@@ -1,0 +1,29 @@
+MessageHeader
+uint16 size
+uint8 opcode
+end
+
+ConnectionRequest
+end
+
+ConnectionResponse
+uint8 response
+int16 connectionID
+end
+
+Heartbeat
+int16 connectionID
+uint8 id
+uint32 ping
+end
+
+Disconnect
+uint8 reason
+int16 connectionID
+end
+
+ClientIPAddresses
+string ips array
+uint16 ports array
+uint16 connectionIds array
+end

@@ -1,0 +1,122 @@
+Started
+After open
+Filepath: "D:\Projects\GitHub\EvayrNet\Development"
+Start of generation path="D:\Projects\GitHub\EvayrNet\Development\"
+
+Line
+Processing word: "MessageHeader"
+New message name="MessageHeader"
+
+Line
+Processing word: "uint16"
+Processing word: "size"
+New member type="uint16_t" name="size" array="no"
+
+Line
+Processing word: "uint8"
+Processing word: "opcode"
+New member type="uint8_t" name="opcode" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
+Processing word: "ConnectionRequest"
+New message name="ConnectionRequest"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
+Processing word: "ConnectionResponse"
+New message name="ConnectionResponse"
+
+Line
+Processing word: "uint8"
+Processing word: "response"
+New member type="uint8_t" name="response" array="no"
+
+Line
+Processing word: "int16"
+Processing word: "connectionID"
+New member type="int16_t" name="connectionID" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
+Processing word: "Heartbeat"
+New message name="Heartbeat"
+
+Line
+Processing word: "int16"
+Processing word: "connectionID"
+New member type="int16_t" name="connectionID" array="no"
+
+Line
+Processing word: "uint8"
+Processing word: "id"
+New member type="uint8_t" name="id" array="no"
+
+Line
+Processing word: "uint32"
+Processing word: "ping"
+New member type="uint32_t" name="ping" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
+Processing word: "Disconnect"
+New message name="Disconnect"
+
+Line
+Processing word: "uint8"
+Processing word: "reason"
+New member type="uint8_t" name="reason" array="no"
+
+Line
+Processing word: "int16"
+Processing word: "connectionID"
+New member type="int16_t" name="connectionID" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
+Processing word: "ClientIPAddresses"
+New message name="ClientIPAddresses"
+
+Line
+Processing word: "string"
+Processing word: "ips"
+New member type="std::string" name="ips" array="yes"
+
+Processing word: "array"
+Line
+Processing word: "uint16"
+Processing word: "ports"
+New member type="uint16_t" name="ports" array="yes"
+
+Processing word: "array"
+Line
+Processing word: "uint16"
+Processing word: "connectionIds"
+New member type="uint16_t" name="connectionIds" array="yes"
+
+Processing word: "array"
+Line
+Processing word: "end"
+End message
+
+Finished generating code :)

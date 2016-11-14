@@ -27,6 +27,14 @@ $RECYCLE.BIN/
 *.idb
 *.pdb
 *.obj
+*.ilk
+
+# Library generated files
+Messages.h
+Messages.cpp
+Server.exe
+Client.exe
+EvayrNet.lib
 
 # Bin folders
 Development/EvayrNet/x64/

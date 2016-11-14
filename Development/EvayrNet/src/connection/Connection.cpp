@@ -167,7 +167,7 @@ void Connection::UpdateLifetime()
 {
 	if (!m_Active) return;
 
-	if (clock() - m_PingClock > kConnectionTimout)
+	if (clock() - m_PingClock > m_connectionTimeout)
 	{
 		printf("Connection with ID %i has timed out.\n", m_ConnectionID);
 		m_Packets.clear();
@@ -185,7 +185,7 @@ void Connection::SendHeartbeat(bool aForceSend)
 	// If it's time to send a heartbeat
 	if (!aForceSend)
 	{
-		if (clock() - m_HeartbeatClock < kHeartbeatInterval) return;
+		if (clock() - m_HeartbeatClock < m_heartbeatInterval) return;
 		m_HeartbeatClock = clock();
 	}
 

@@ -71,9 +71,9 @@ void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage,
 	m_pUDPSocket->AddMessage(apMessage, Messages::EMessageType::MESSAGE_SEQUENCED, aConnectionID);
 }
 
-void NetworkManager::RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode)
+void NetworkManager::RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode)
 {
-	m_PacketHandler.RegisterMessage(apMessage, aOpCode);
+	m_PacketHandler.RegisterMessage(std::move(apMessage), aOpCode);
 }
 
 void NetworkManager::SetTickRate(uint8_t aSendTickRate)

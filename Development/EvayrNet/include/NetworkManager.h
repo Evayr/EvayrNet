@@ -30,7 +30,7 @@ namespace EvayrNet
 		void SendReliable(std::shared_ptr<Messages::Message> apMessage, int16_t aConnectionID = -1);
 		void SendSequenced(std::shared_ptr<Messages::Message> apMessage, int16_t aConnectionID = -1);
 
-		void RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode);
+		void RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode);
 
 		void SetTickRate(uint8_t aSendTickRate = kDefaultTickRate);
 

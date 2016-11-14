@@ -22,7 +22,7 @@ namespace EvayrNet
 		UDPSocket();
 		~UDPSocket();
 
-		void ConnectTo(const char* apIP, uint16_t aPort);
+		void ConnectTo(const char* acpIP, uint16_t aPort);
 		void Disconnect();
 
 		void Update();

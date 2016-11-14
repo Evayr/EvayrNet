@@ -36,15 +36,15 @@ namespace EvayrNet
 
 		bool IsConnected() const;
 
-		std::shared_ptr<NetworkSystem> GetNetworkSystem();
-		std::shared_ptr<UDPSocket> GetUDPSocket();
+		NetworkSystem* GetNetworkSystem();
+		UDPSocket* GetUDPSocket();
 
 	private:
 		void CreateSocket(uint16_t aPort);
 
 		PacketHandler m_PacketHandler;
-		std::shared_ptr<UDPSocket> m_pUDPSocket;
-		std::shared_ptr<NetworkSystem> m_pNetworkSystem;
+		std::unique_ptr<UDPSocket> m_pUDPSocket;
+		std::unique_ptr<NetworkSystem> m_pNetworkSystem;
 	};
 
 	extern NetworkManager* g_Network;

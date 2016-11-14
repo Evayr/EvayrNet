@@ -3,15 +3,17 @@
 
 using namespace EvayrNet;
 
-Connection::Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats)
+Connection::Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval, uint32_t aConnectionTimeout)
 	: m_IPAddress(aIPAddress)
 	, m_ConnectionID(aConnectionID)
 	, m_Active(true)
-	, m_HeartbeatID(0)
+	, m_heartbeatInterval(aHeartbeatInterval)
+	, m_connectionTimeout(aConnectionTimeout)
 	, m_HeartbeatClock(clock())
+	, m_HeartbeatID(0)
 	, m_PingClock(clock())
 	, m_Ping(0)
-	, m_SendAutoHeartbeats(aSendHeartbeats)
+	, m_SendHeartbeats(aSendHeartbeats)
 {
 }
 
@@ -127,12 +129,12 @@ uint32_t EvayrNet::Connection::GetPing() const
 
 void Connection::EnableAutoHeartbeat()
 {
-	m_SendAutoHeartbeats = true;
+	m_SendHeartbeats = true;
 }
 
 void Connection::DisableAutoHeartbeat()
 {
-	m_SendAutoHeartbeats = false;
+	m_SendHeartbeats = false;
 }
 
 bool Connection::HeartbeatIsNewer(uint8_t aID)
@@ -172,7 +174,7 @@ void Connection::UpdateLifetime()
 		m_Active = false;
 	}
 
-	if (m_SendAutoHeartbeats)
+	if (m_SendHeartbeats)
 	{
 		SendHeartbeat(false);
 	}

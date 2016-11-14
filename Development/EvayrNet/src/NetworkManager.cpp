@@ -86,12 +86,12 @@ bool NetworkManager::IsConnected() const
 	return m_pUDPSocket->IsConnected();
 }
 
-std::shared_ptr<NetworkSystem> EvayrNet::NetworkManager::GetNetworkSystem()
+NetworkSystem* EvayrNet::NetworkManager::GetNetworkSystem()
 {
-	return m_pNetworkSystem;
+	return m_pNetworkSystem.get();
 }
 
-std::shared_ptr<UDPSocket> NetworkManager::GetUDPSocket()
+UDPSocket* NetworkManager::GetUDPSocket()
 {
-	return m_pUDPSocket;
+	return m_pUDPSocket.get();
 }

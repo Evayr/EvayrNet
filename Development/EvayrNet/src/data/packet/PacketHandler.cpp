@@ -12,21 +12,13 @@ PacketHandler::PacketHandler()
 
 PacketHandler::~PacketHandler()
 {
-	for (uint8_t i = 0; i < UINT8_MAX; ++i)
-	{
-		if (m_Messages[i])
-		{
-			delete m_Messages[i];
-			m_Messages[i] = nullptr;
-		}
-	}
 }
 
-void PacketHandler::RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode)
+void PacketHandler::RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode)
 {
 	if (!m_Messages[aOpCode])
 	{
-		m_Messages[aOpCode] = apMessage;
+		m_Messages[aOpCode] = std::move(apMessage);
 	}
 	else
 	{
@@ -50,7 +42,7 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 		header.Deserialize(reader);
 		if (header.size == 0) break;
 
-		Messages::Message* pMessage = m_Messages[header.opcode];
+		std::unique_ptr<Messages::Message>& pMessage = m_Messages[header.opcode];
 		pMessage->Deserialize(reader);
 
 		bytesRead += header.size;
@@ -60,28 +52,28 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 void PacketHandler::RegisterDefaultMessages()
 {
 	// Message Header
-	auto pHeader = new Messages::MessageHeader();
-	RegisterMessage(pHeader, pHeader->GetMessageOpcode());
+	auto pHeader = std::make_unique<Messages::MessageHeader>();
+	RegisterMessage(std::move(pHeader), pHeader->GetMessageOpcode());
 
 	// Connection Request
-	auto pConnectionRequest = new Messages::ConnectionRequest();
-	RegisterMessage(pConnectionRequest, pConnectionRequest->GetMessageOpcode());
+	auto pConnectionRequest = std::make_unique<Messages::ConnectionRequest>();
+	RegisterMessage(std::move(pConnectionRequest), pConnectionRequest->GetMessageOpcode());
 
 	// Connection Response
-	auto pConnectionResponse = new Messages::ConnectionResponse();
-	RegisterMessage(pConnectionResponse, pConnectionResponse->GetMessageOpcode());
+	auto pConnectionResponse = std::make_unique<Messages::ConnectionResponse>();
+	RegisterMessage(std::move(pConnectionResponse), pConnectionResponse->GetMessageOpcode());
 
 	// Heartbeat
-	auto pHeartbeat = new Messages::Heartbeat();
-	RegisterMessage(pHeartbeat, pHeartbeat->GetMessageOpcode());
+	auto pHeartbeat = std::make_unique<Messages::Heartbeat>();
+	RegisterMessage(std::move(pHeartbeat), pHeartbeat->GetMessageOpcode());
 
 	// Disconnect
-	auto pDisconnect = new Messages::Disconnect();
-	RegisterMessage(pDisconnect, pDisconnect->GetMessageOpcode());
+	auto pDisconnect = std::make_unique<Messages::Disconnect>();
+	RegisterMessage(std::move(pDisconnect), pDisconnect->GetMessageOpcode());
 
 	// Client IP Addresses
-	auto pClientIPAddresses = new Messages::ClientIPAddresses();
-	RegisterMessage(pClientIPAddresses, pClientIPAddresses->GetMessageOpcode());
+	auto pClientIPAddresses = std::make_unique<Messages::ClientIPAddresses>();
+	RegisterMessage(std::move(pClientIPAddresses), pClientIPAddresses->GetMessageOpcode());
 }
 
 void PacketHandler::ProcessMessage()

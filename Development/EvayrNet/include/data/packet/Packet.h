@@ -31,7 +31,7 @@ namespace EvayrNet
 		void Encrypt();
 		void Decrypt();
 
-		void SetData(const char* aData, uint16_t aLength);
+		void SetData(const char* acData, uint16_t aLength);
 		const char* GetData() const;
 		uint16_t GetMessagesSize() const;
 		uint16_t GetDataSize() const;

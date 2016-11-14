@@ -38,7 +38,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 		printf("Client accepted\n");
 
 		// Welcome the client
-		std::shared_ptr<Messages::ConnectionResponse> pMessage = std::make_shared<Messages::ConnectionResponse>();
+		auto pMessage = std::make_shared<Messages::ConnectionResponse>();
 		pMessage->response = Messages::EConnectionResult::RESULT_SUCCESS;
 		pMessage->connectionID = g_Network->GetUDPSocket()->GetNewestConnection()->GetConnectionID();
 		g_Network->SendReliable(pMessage, pMessage->connectionID);
@@ -47,7 +47,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 	{
 		printf("Client refused\n");
 		// Refuse the client
-		std::shared_ptr<Messages::ConnectionResponse> pMessage = std::make_shared<Messages::ConnectionResponse>();
+		auto pMessage = std::make_shared<Messages::ConnectionResponse>();
 		pMessage->response = Messages::EConnectionResult::RESULT_SERVER_FULL;
 		pMessage->connectionID = g_Network->GetUDPSocket()->GetNewestConnection()->GetConnectionID();
 		g_Network->SendReliable(pMessage, pMessage->connectionID);

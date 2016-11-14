@@ -18,11 +18,11 @@ namespace EvayrNet
 	public:
 		enum
 		{
-			kHeartbeatInterval = 250, // ms
-			kConnectionTimout = 5000, // ms
+			kDefaultHeartbeatInterval = 250, // ms
+			kDefaultConnectionTimout = 5000, // ms
 		};
 
-		Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats);
+		Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval = kDefaultHeartbeatInterval, uint32_t aConnectionTimeout = kDefaultConnectionTimout);
 		~Connection();
 
 		void Update();
@@ -64,7 +64,9 @@ namespace EvayrNet
 		bool m_Active : 1;
 
 		// Heartbeat
-		bool m_SendAutoHeartbeats : 1;
+		bool m_SendHeartbeats : 1;
+		uint16_t m_heartbeatInterval;
+		uint32_t m_connectionTimeout;
 		clock_t m_HeartbeatClock;
 		uint8_t m_HeartbeatID;
 

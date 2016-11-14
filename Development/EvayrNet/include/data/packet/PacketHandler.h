@@ -16,7 +16,7 @@ namespace EvayrNet
 		PacketHandler();
 		~PacketHandler();
 
-		void RegisterMessage(Messages::Message* apMessage, uint8_t aOpCode);
+		void RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode);
 
 		void ProcessPacket(Packet& aPacket);
 
@@ -24,7 +24,7 @@ namespace EvayrNet
 		void RegisterDefaultMessages();
 		void ProcessMessage();
 
-		Messages::Message* m_Messages[kMaxMessages];
+		std::unique_ptr<Messages::Message> m_Messages[kMaxMessages];
 	};
 }
 

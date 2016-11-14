@@ -27,12 +27,12 @@ UDPSocket::~UDPSocket()
 {
 }
 
-void UDPSocket::ConnectTo(const char* apIP, uint16_t aPort)
+void UDPSocket::ConnectTo(const char* acpIP, uint16_t aPort)
 {
 	m_Connections.clear();
 
 	IPAddress ip;
-	ip.m_Address = apIP;
+	ip.m_Address = acpIP;
 	ip.m_Port = aPort;
 
 	// When connecting to a server, the server is always connection id 0

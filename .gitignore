@@ -71,3 +71,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 Development/codegen log.txt
+*.cache
+Development/EvayrNet/x64/Debug/Client.exe
+*.ilk
+Development/EvayrNet/x64/Debug/Server.exe
+*.cache

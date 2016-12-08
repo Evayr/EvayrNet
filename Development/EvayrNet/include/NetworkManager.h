@@ -26,9 +26,9 @@ namespace EvayrNet
 		void ConnectTo(const char* apIP, uint16_t aPort);
 		void Disconnect();
 
-		void Send(std::shared_ptr<Messages::Message> apMessage, int16_t aConnectionID = -1);
-		void SendReliable(std::shared_ptr<Messages::Message> apMessage, int16_t aConnectionID = -1);
-		void SendSequenced(std::shared_ptr<Messages::Message> apMessage, int16_t aConnectionID = -1);
+		void Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
+		void SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
+		void SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
 
 		void RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode);
 

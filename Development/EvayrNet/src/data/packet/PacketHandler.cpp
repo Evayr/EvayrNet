@@ -40,16 +40,23 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 
 	while(bytesRead < packetSize)
 	{
-		header.Deserialize(reader);
+		reader.Read(header.size);
 		if (header.size == 0) break;
 
+		reader.Read(header.type);
+		reader.Read(header.opcode);
 		switch (header.type)
 		{
 			case Messages::EMessageType::MESSAGE_RELIABLE:
 			case Messages::EMessageType::MESSAGE_SEQUENCED:
 			{
-				ack.Deserialize(reader);
-				g_Network->GetUDPSocket()->GetConnection(ack.connectionID)->ProcessACK(ack);
+				//Messages::MessageHeader ackHeader;
+				//reader.Read(ackHeader.size);
+				//reader.Read(ackHeader.type);
+				//reader.Read(ackHeader.opcode);
+
+				//ack.Deserialize(reader);
+				//g_Network->GetUDPSocket()->GetConnection(ack.connectionID)->ProcessACK(ack);
 				break;
 			}
 		}

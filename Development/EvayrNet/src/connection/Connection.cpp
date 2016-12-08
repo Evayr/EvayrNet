@@ -3,13 +3,14 @@
 
 using namespace EvayrNet;
 
-Connection::Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval, uint32_t aConnectionTimeout)
-	: m_IPAddress(aIPAddress)
+Connection::Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval, uint32_t aConnectionTimeout)
+	: m_IPAddress(acIPAddress)
 	, m_ConnectionID(aConnectionID)
 	, m_Active(true)
 	, m_heartbeatInterval(aHeartbeatInterval)
 	, m_connectionTimeout(aConnectionTimeout)
-	, m_newestACKID(0)
+	, m_newestSendACKID(0)
+	, m_newestReceiveACKID(0)
 	, m_HeartbeatClock(clock())
 	, m_HeartbeatID(0)
 	, m_PingClock(clock())
@@ -27,8 +28,21 @@ void Connection::Update()
 	UpdateLifetime();
 }
 
-void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage, Messages::EMessageType aType)
+void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage)
 {
+	// Add ACK is necessary
+	if (apMessage->messageType != Messages::EMessageType::MESSAGE_UNRELIABLE)
+	{
+		//m_newestSendACKID++;
+		//auto pACK = std::make_shared<Messages::ACK>();
+		//pACK->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
+		//pACK->id = m_newestSendACKID;
+		//pACK->messageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
+		//AddMessage(pACK);
+
+		//AddCachedMessage(apMessage, m_newestSendACKID);
+	}
+
 	// Check if there's a packet available - if not, create a new packet
 	if (m_Packets.size() == 0)
 	{
@@ -41,11 +55,6 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage,
 
 	// Add message
 	m_Packets[m_Packets.size() - 1]->AddMessage(apMessage);
-
-	if (aType != Messages::EMessageType::MESSAGE_UNRELIABLE)
-	{
-		AddCachedMessage(apMessage, m_newestACKID);
-	}
 }
 
 void Connection::AddCachedMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID)
@@ -93,7 +102,7 @@ void Connection::ClearPackets()
 	m_Packets.clear();
 }
 
-int16_t Connection::GetConnectionID() const
+uint16_t Connection::GetConnectionID() const
 {
 	return m_ConnectionID;
 }
@@ -112,7 +121,7 @@ void Connection::ProcessACK(const Messages::ACK& acACK)
 {
 	if (ACKIsNewer(acACK.id))
 	{
-		m_newestACKID = acACK.id;
+		m_newestReceiveACKID = acACK.id;
 
 		// Send acknowledgment of the ACK we've been given
 		auto ackSend = std::make_unique<Messages::AcknowledgeACK>();
@@ -192,9 +201,9 @@ bool Connection::HeartbeatIsNewer(uint8_t aID) const
 
 bool Connection::ACKIsNewer(uint8_t aID) const
 {
-	if (m_newestACKID < aID)
+	if (m_newestReceiveACKID < aID)
 	{
-		if (aID - m_newestACKID <= UINT8_MAX / 2)
+		if (aID - m_newestReceiveACKID <= UINT8_MAX / 2)
 		{
 			return true;
 		}
@@ -205,7 +214,7 @@ bool Connection::ACKIsNewer(uint8_t aID) const
 	}
 	else
 	{
-		if (m_newestACKID - aID >= UINT8_MAX / 2)
+		if (m_newestReceiveACKID - aID >= UINT8_MAX / 2)
 		{
 			return true;
 		}

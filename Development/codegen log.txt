@@ -1,7 +1,11 @@
 Started
+Opening f file
+Opening cpp file
+Opening h file
+Truncating
 After open
-Filepath: "D:\Projects\GitHub\EvayrNet\Development"
-Start of generation path="D:\Projects\GitHub\EvayrNet\Development\"
+Filepath: "E:\Projects\GitHub\EvayrNet\Development"
+Start of generation path="E:\Projects\GitHub\EvayrNet\Development\"
 
 Line
 Processing word: "MessageHeader"
@@ -14,8 +18,51 @@ New member type="uint16_t" name="size" array="no"
 
 Line
 Processing word: "uint8"
+Processing word: "type"
+New member type="uint8_t" name="type" array="no"
+
+Line
+Processing word: "uint8"
 Processing word: "opcode"
 New member type="uint8_t" name="opcode" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
+Processing word: "ACK"
+New message name="ACK"
+
+Line
+Processing word: "uint16"
+Processing word: "connectionID"
+New member type="uint16_t" name="connectionID" array="no"
+
+Line
+Processing word: "uint8"
+Processing word: "id"
+New member type="uint8_t" name="id" array="no"
+
+Line
+Processing word: "end"
+End message
+
+Line
+Line
+Processing word: "AcknowledgeACK"
+New message name="AcknowledgeACK"
+
+Line
+Processing word: "uint16"
+Processing word: "connectionID"
+New member type="uint16_t" name="connectionID" array="no"
+
+Line
+Processing word: "uint8"
+Processing word: "id"
+New member type="uint8_t" name="id" array="no"
 
 Line
 Processing word: "end"
@@ -41,9 +88,9 @@ Processing word: "response"
 New member type="uint8_t" name="response" array="no"
 
 Line
-Processing word: "int16"
+Processing word: "uint16"
 Processing word: "connectionID"
-New member type="int16_t" name="connectionID" array="no"
+New member type="uint16_t" name="connectionID" array="no"
 
 Line
 Processing word: "end"
@@ -55,9 +102,9 @@ Processing word: "Heartbeat"
 New message name="Heartbeat"
 
 Line
-Processing word: "int16"
+Processing word: "uint16"
 Processing word: "connectionID"
-New member type="int16_t" name="connectionID" array="no"
+New member type="uint16_t" name="connectionID" array="no"
 
 Line
 Processing word: "uint8"
@@ -84,9 +131,9 @@ Processing word: "reason"
 New member type="uint8_t" name="reason" array="no"
 
 Line
-Processing word: "int16"
+Processing word: "uint16"
 Processing word: "connectionID"
-New member type="int16_t" name="connectionID" array="no"
+New member type="uint16_t" name="connectionID" array="no"
 
 Line
 Processing word: "end"

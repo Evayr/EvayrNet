@@ -28,12 +28,12 @@ namespace EvayrNet
 			uint8_t m_ackID;
 		};
 
-		Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval = kDefaultHeartbeatInterval, uint32_t aConnectionTimeout = kDefaultConnectionTimout);
+		Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval = kDefaultHeartbeatInterval, uint32_t aConnectionTimeout = kDefaultConnectionTimout);
 		~Connection();
 
 		void Update();
 
-		void AddMessage(const std::shared_ptr<Messages::Message>& apMessage, Messages::EMessageType aType);
+		void AddMessage(const std::shared_ptr<Messages::Message>& apMessage);
 		void AddCachedMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID);
 		void RemoveCachedMessage(uint8_t aACKID);
 
@@ -43,7 +43,7 @@ namespace EvayrNet
 		const std::vector<Connection::CachedMessage>& GetCachedMessages();
 		void ClearPackets();
 
-		int16_t GetConnectionID() const;
+		uint16_t GetConnectionID() const;
 
 		void SetActive(bool aVal);
 		bool IsActive() const;
@@ -68,11 +68,12 @@ namespace EvayrNet
 
 		// Connectivity
 		IPAddress m_IPAddress;
-		int16_t m_ConnectionID;
+		uint16_t m_ConnectionID;
 		bool m_Active : 1;
 
 		// ACKs
-		uint8_t m_newestACKID;
+		uint8_t m_newestSendACKID;
+		uint8_t m_newestReceiveACKID;
 
 		// Heartbeat
 		bool m_SendHeartbeats : 1;

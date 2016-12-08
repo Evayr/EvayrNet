@@ -1,5 +1,6 @@
 #include "socket\UDPSocket.h"
 #include "NetworkManager.h"
+#include "data\messages\Messages.h"
 
 using namespace EvayrNet;
 
@@ -8,6 +9,7 @@ UDPSocket::UDPSocket()
 	: m_Connecting(false)
 	, m_Connected(false)
 	, m_ConnectionID(-1)
+	, m_ConnectionIDGenerator(UINT16_MAX)
 	, m_ConnectClock(0)
 	, m_ConnectionAttempts(0)
 	
@@ -21,6 +23,7 @@ UDPSocket::UDPSocket()
 
 	, m_pPacketHandler(nullptr)
 {
+	m_ConnectionIDGenerator.Skip(); // Make sure clients start with ID 1, so that 0 can be used for invalid IDs
 }
 
 UDPSocket::~UDPSocket()
@@ -35,9 +38,9 @@ void UDPSocket::ConnectTo(const char* acpIP, uint16_t aPort)
 	ip.m_Address = acpIP;
 	ip.m_Port = aPort;
 
-	// When connecting to a server, the server is always connection id 0
+	// When connecting to a server, the server is always connection id 1 (kServerConnectionID), as 0 is for uninitialized/invalid connection IDs
 	// Also don't allow the client to send heartbeats - the server should be managing that
-	m_Connections.push_back(Connection(ip, 0, false));
+	m_Connections.push_back(Connection(ip, kServerConnectionID, false));
 
 	m_Connected = false;
 	m_Connecting = true;
@@ -45,7 +48,7 @@ void UDPSocket::ConnectTo(const char* acpIP, uint16_t aPort)
 	m_ConnectionAttempts = 0;
 	m_ConnectClock = clock() - kRetryConnectInterval; // Start right away
 
-	printf("Connecting to %s:%i...\n", ip.m_Address.c_str(), aPort);
+	printf("Connecting to %s:%u...\n", ip.m_Address.c_str(), aPort);
 }
 
 void UDPSocket::Disconnect()
@@ -73,18 +76,24 @@ void UDPSocket::Update()
 	UpdateStatistics();
 }
 
-void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messages::EMessageType aType, int16_t aConnectionID)
+void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
-	if (aConnectionID == -1)
+	if (aConnectionID == 0)
 	{
-		for (size_t i = 0; i < m_Connections.size(); ++i)
+		for (auto& connection : m_Connections)
 		{
-			m_Connections[i].AddMessage(apMessage, aType);
+			if (!connection.IsActive()) continue;
+			connection.AddMessage(apMessage);
 		}
 	}
 	else
 	{
-		m_Connections[aConnectionID].AddMessage(apMessage, aType);
+		Connection* pConnection = GetConnection(aConnectionID);
+
+		if (pConnection)
+		{
+			pConnection->AddMessage(apMessage);
+		}
 	}
 }
 
@@ -96,40 +105,43 @@ void UDPSocket::SetTickRate(uint8_t aTickRateSend)
 
 void UDPSocket::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 {
-	for (size_t i = 0; i < m_Connections.size(); ++i)
+	for (auto& connection : m_Connections)
 	{
-		if (m_Connections[i].GetConnectionID() == acMessage.connectionID)
+		if (connection.GetConnectionID() == acMessage.connectionID)
 		{
-			m_Connections[i].ProcessHeartbeat(acMessage);
+			connection.ProcessHeartbeat(acMessage);
 			return;
 		}
 	}
 }
 
-int16_t UDPSocket::ProcessIPAddress(IPAddress aIPAddress)
+int16_t UDPSocket::ProcessIPAddress(const IPAddress& aIPAddress)
 {
 	// Checks if the connection is new. If so, create a new Connection
 	// Returns the ConnectionID of the connection
-	for (size_t i = 0; i < m_Connections.size(); ++i)
+	for (auto& connection : m_Connections)
 	{
-		if (m_Connections[i].GetIPAddress() == aIPAddress && m_Connections[i].IsActive())
+		if (connection.GetIPAddress() == aIPAddress && connection.IsActive())
 		{
-			return m_Connections[i].GetConnectionID();
+			return connection.GetConnectionID();
 		}
 	}
 
 	// No connection found - create new one
-	printf("Adding %s:%u as a new connection...\n", aIPAddress.m_Address.c_str(), aIPAddress.m_Port);
-	int16_t connectionID = int16_t(m_Connections.size());
+	uint16_t connectionID = m_ConnectionIDGenerator.GenerateID();
+	printf("Adding %s:%u as a new connection with connection ID %u...\n", aIPAddress.m_Address.c_str(), aIPAddress.m_Port, connectionID);
+
 	m_Connections.push_back(Connection(aIPAddress, connectionID, g_Network->GetNetworkSystem()->IsServer()));
 	return connectionID;
 }
 
 void UDPSocket::ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK)
 {
-	if (acACK.connectionID < m_Connections.size())
+	Connection* pConnection = GetConnection(acACK.connectionID);
+
+	if (pConnection)
 	{
-		m_Connections[acACK.connectionID].RemoveCachedMessage(acACK.id);
+		pConnection->RemoveCachedMessage(acACK.id);
 	}
 }
 
@@ -149,7 +161,7 @@ bool UDPSocket::IsConnected() const
 	return m_Connected;
 }
 
-void UDPSocket::AddConnection(IPAddress aIPAddress, bool aSendHeartbeats)
+void UDPSocket::AddConnection(const IPAddress& aIPAddress, bool aSendHeartbeats)
 {
 	m_Connections.push_back(Connection(aIPAddress, int16_t(m_Connections.size()), false));
 }
@@ -158,7 +170,7 @@ Connection* UDPSocket::GetNewestConnection()
 {
 	if (m_Connections.size() > 0)
 	{
-		return &m_Connections[m_Connections.size() - 1];
+		return &m_Connections.back();
 	}
 	else
 	{
@@ -166,13 +178,15 @@ Connection* UDPSocket::GetNewestConnection()
 	}
 }
 
-Connection* UDPSocket::GetConnection(int16_t aID)
+Connection* UDPSocket::GetConnection(uint16_t aID)
 {
-	for (size_t i = 0; i < m_Connections.size(); ++i)
+	if (aID == 0) return nullptr;
+
+	for (auto& connection : m_Connections)
 	{
-		if (m_Connections[i].GetConnectionID() == aID)
+		if (connection.GetConnectionID() == aID)
 		{
-			return &m_Connections[i];
+			return &connection;
 		}
 	}
 
@@ -183,11 +197,11 @@ uint8_t UDPSocket::GetActiveConnectionsCount() const
 {
 	uint8_t count = 0;
 
-	for (size_t i = 0; i < m_Connections.size(); ++i)
+	for (auto& connection : m_Connections)
 	{
-		if (m_Connections[i].IsActive())
+		if (connection.IsActive())
 		{
-			count += 1;
+			count++;
 		}
 	}
 
@@ -217,9 +231,9 @@ void UDPSocket::Connect()
 	m_ConnectClock = clock();
 
 	auto pRequest = std::make_shared<Messages::ConnectionRequest>();
-	AddMessage(pRequest, Messages::EMessageType::MESSAGE_UNRELIABLE, 0);
+	g_Network->Send(pRequest, kServerConnectionID);
 
-	m_ConnectionAttempts += 1;
+	m_ConnectionAttempts++;
 
 	if (m_ConnectionAttempts >= kConnectionAttempts)
 	{
@@ -259,9 +273,9 @@ void UDPSocket::ReceivePackets()
 
 void UDPSocket::UpdateConnections()
 {
-	for (size_t i = 0; i < m_Connections.size(); ++i)
+	for (auto& connection : m_Connections)
 	{
-		m_Connections[i].Update();
+		connection.Update();
 	}
 }
 
@@ -291,7 +305,7 @@ void UDPSocket::RemoveTimeIfExceedsAmount(std::list<clock_t>* apList, float aTim
 	}
 }
 
-void UDPSocket::AddConnection(IPAddress aIPAddress, int16_t aConnectionID)
+void UDPSocket::AddConnection(const IPAddress& aIPAddress, uint16_t aConnectionID)
 {
 	m_Connections.push_back(std::move(Connection(aIPAddress, aConnectionID, g_Network->GetNetworkSystem()->IsServer())));
 }

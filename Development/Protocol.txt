@@ -5,12 +5,12 @@ uint8 opcode
 end
 
 ACK
-int16 connectionID
+uint16 connectionID
 uint8 id
 end
 
 AcknowledgeACK
-int16 connectionID
+uint16 connectionID
 uint8 id
 end
 
@@ -19,18 +19,18 @@ end
 
 ConnectionResponse
 uint8 response
-int16 connectionID
+uint16 connectionID
 end
 
 Heartbeat
-int16 connectionID
+uint16 connectionID
 uint8 id
 uint32 ping
 end
 
 Disconnect
 uint8 reason
-int16 connectionID
+uint16 connectionID
 end
 
 ClientIPAddresses

@@ -34,6 +34,7 @@
     <ClInclude Include="include\systems\client\NetworkClient.h" />
     <ClInclude Include="include\systems\NetworkSystem.h" />
     <ClInclude Include="include\systems\server\NetworkServer.h" />
+    <ClInclude Include="include\utils\IDGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\connection\Connection.cpp" />
@@ -49,6 +50,7 @@
     <ClCompile Include="src\systems\client\NetworkClient.cpp" />
     <ClCompile Include="src\systems\NetworkSystem.cpp" />
     <ClCompile Include="src\systems\server\NetworkServer.cpp" />
+    <ClCompile Include="src\utils\IDGenerator.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E6222FDA-35AC-419B-99EC-4A5C9F8AF3E6}</ProjectGuid>

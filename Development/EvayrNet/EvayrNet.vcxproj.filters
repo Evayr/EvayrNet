@@ -73,6 +73,12 @@
     <Filter Include="Header Files\Systems\Server">
       <UniqueIdentifier>{fd20d801-7b57-4b91-9b26-0dbd00691786}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{72371c9f-b86b-4ffe-a15c-9bcc76c1cced}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{97f33a42-31e4-4734-9ead-3bdc929592ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NetworkManager.h">
@@ -120,6 +126,9 @@
     <ClInclude Include="include\systems\client\NetworkClient.h">
       <Filter>Header Files\Systems\Client</Filter>
     </ClInclude>
+    <ClInclude Include="include\utils\IDGenerator.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\NetworkManager.cpp">
@@ -160,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="src\systems\server\NetworkServer.cpp">
       <Filter>Source Files\Systems\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\IDGenerator.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

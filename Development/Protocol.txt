@@ -1,6 +1,17 @@
 MessageHeader
 uint16 size
+uint8 type
 uint8 opcode
+end
+
+ACK
+int16 connectionID
+uint8 id
+end
+
+AcknowledgeACK
+int16 connectionID
+uint8 id
 end
 
 ConnectionRequest

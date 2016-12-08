@@ -1,12 +1,12 @@
 #include "data\packet\PacketHandler.h"
 #include "data\stream\DataStream.h"
 #include "data\messages\Messages.h"
+#include "NetworkManager.h"
 
 using namespace EvayrNet;
 
 PacketHandler::PacketHandler()
 {
-	memset(&m_Messages[0], 0, sizeof(m_Messages));
 	RegisterDefaultMessages();
 }
 
@@ -33,6 +33,7 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 	DataStreamReader reader = aPacket.GetDataStream().CreateReader();
 
 	Messages::MessageHeader header;
+	Messages::ACK ack;
 
 	uint16_t packetSize = aPacket.GetDataSize();
 	uint16_t bytesRead = 0;
@@ -41,6 +42,17 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 	{
 		header.Deserialize(reader);
 		if (header.size == 0) break;
+
+		switch (header.type)
+		{
+			case Messages::EMessageType::MESSAGE_RELIABLE:
+			case Messages::EMessageType::MESSAGE_SEQUENCED:
+			{
+				ack.Deserialize(reader);
+				g_Network->GetUDPSocket()->GetConnection(ack.connectionID)->ProcessACK(ack);
+				break;
+			}
+		}
 
 		std::unique_ptr<Messages::Message>& pMessage = m_Messages[header.opcode];
 		pMessage->Deserialize(reader);
@@ -54,6 +66,14 @@ void PacketHandler::RegisterDefaultMessages()
 	// Message Header
 	auto pHeader = std::make_unique<Messages::MessageHeader>();
 	RegisterMessage(std::move(pHeader), pHeader->GetMessageOpcode());
+
+	// ACK
+	auto pACK = std::make_unique<Messages::ACK>();
+	RegisterMessage(std::move(pACK), pACK->GetMessageOpcode());
+
+	// Acknowledgment of the ACK
+	auto pAcknowledgeACK = std::make_unique<Messages::AcknowledgeACK>();
+	RegisterMessage(std::move(pAcknowledgeACK), pAcknowledgeACK->GetMessageOpcode());
 
 	// Connection Request
 	auto pConnectionRequest = std::make_unique<Messages::ConnectionRequest>();
@@ -81,5 +101,9 @@ void PacketHandler::ProcessMessage()
 }
 
 void EvayrNet::Messages::MessageHeader_Receive(const Messages::MessageHeader& acMessage)
+{
+}
+
+void EvayrNet::Messages::ACK_Receive(const Messages::ACK& acMessage)
 {
 }

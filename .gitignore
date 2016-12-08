@@ -76,3 +76,9 @@ Development/EvayrNet/x64/Debug/Client.exe
 *.ilk
 Development/EvayrNet/x64/Debug/Server.exe
 *.cache
+Development/EvayrNet/x64/Debug/Client.exe
+*.ilk
+Development/codegen log.txt
+Development/EvayrNet/bin/x64/Debug/EvayrNet.lib
+*.exe
+*.ilk

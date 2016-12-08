@@ -259,10 +259,15 @@ log.truncate()
 output = ""
 origin = ""
 filename = "Protocol.txt"
+Log("Opening f file")
 f = open(path + filename, 'r')
-
+Log("Opening cpp file")
 cpp = open(path + subdircpp + 'messages.cpp','w+')
+Log("Opening h file")
 h = open(path + subdirh + 'messages.h','w+')
+
+Log("Truncating")
+
 cpp.truncate()
 h.truncate()
 

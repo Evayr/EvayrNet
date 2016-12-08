@@ -125,6 +125,14 @@ int16_t UDPSocket::ProcessIPAddress(IPAddress aIPAddress)
 	return connectionID;
 }
 
+void UDPSocket::ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK)
+{
+	if (acACK.connectionID < m_Connections.size())
+	{
+		m_Connections[acACK.connectionID].RemoveCachedMessage(acACK.id);
+	}
+}
+
 void UDPSocket::SetConnected(bool aVal)
 {
 	m_Connected = aVal;
@@ -289,6 +297,11 @@ void UDPSocket::AddConnection(IPAddress aIPAddress, int16_t aConnectionID)
 }
 
 // Handles
+void EvayrNet::Messages::AcknowledgeACK_Receive(const Messages::AcknowledgeACK& acMessage)
+{
+	g_Network->GetUDPSocket()->ProcessACKAcknowledgment(acMessage);
+}
+
 void EvayrNet::Messages::Heartbeat_Receive(const Messages::Heartbeat& acMessage)
 {
 	g_Network->GetUDPSocket()->ProcessHeartbeat(acMessage);

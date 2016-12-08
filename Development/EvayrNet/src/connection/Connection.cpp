@@ -9,6 +9,7 @@ Connection::Connection(IPAddress aIPAddress, int16_t aConnectionID, bool aSendHe
 	, m_Active(true)
 	, m_heartbeatInterval(aHeartbeatInterval)
 	, m_connectionTimeout(aConnectionTimeout)
+	, m_newestACKID(0)
 	, m_HeartbeatClock(clock())
 	, m_HeartbeatID(0)
 	, m_PingClock(clock())
@@ -26,7 +27,7 @@ void Connection::Update()
 	UpdateLifetime();
 }
 
-void Connection::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messages::EMessageType aType)
+void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage, Messages::EMessageType aType)
 {
 	// Check if there's a packet available - if not, create a new packet
 	if (m_Packets.size() == 0)
@@ -43,16 +44,28 @@ void Connection::AddMessage(std::shared_ptr<Messages::Message> apMessage, Messag
 
 	if (aType != Messages::EMessageType::MESSAGE_UNRELIABLE)
 	{
-		m_CachedMessages.push_back(apMessage);
+		AddCachedMessage(apMessage, m_newestACKID);
 	}
 }
 
-void Connection::AddCachedMessage()
+void Connection::AddCachedMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID)
 {
+	CachedMessage message;
+	message.m_pMessage = apMessage;
+	message.m_ackID = aACKID;
+
+	m_CachedMessages.push_back(message);
 }
 
-void Connection::RemoveCachedMessage()
+void Connection::RemoveCachedMessage(uint8_t aACKID)
 {
+	for (size_t i = 0; i < m_CachedMessages.size(); ++i)
+	{
+		if (m_CachedMessages[i].m_ackID == aACKID)
+		{
+			m_CachedMessages.erase(m_CachedMessages.begin() + i);
+		}
+	}
 }
 
 const IPAddress& Connection::GetIPAddress()
@@ -70,7 +83,7 @@ std::shared_ptr<Packet> Connection::GetPacket(uint8_t aPacketID)
 	return m_Packets[aPacketID];
 }
 
-const std::list<std::shared_ptr<Messages::Message>>& Connection::GetCachedMessages()
+const std::vector<Connection::CachedMessage>& Connection::GetCachedMessages()
 {
 	return m_CachedMessages;
 }
@@ -93,6 +106,20 @@ void Connection::SetActive(bool aVal)
 bool Connection::IsActive() const
 {
 	return m_Active;
+}
+
+void Connection::ProcessACK(const Messages::ACK& acACK)
+{
+	if (ACKIsNewer(acACK.id))
+	{
+		m_newestACKID = acACK.id;
+
+		// Send acknowledgment of the ACK we've been given
+		auto ackSend = std::make_unique<Messages::AcknowledgeACK>();
+		ackSend->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
+		ackSend->id = acACK.id;
+		g_Network->Send(std::move(ackSend), acACK.connectionID);
+	}
 }
 
 void Connection::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
@@ -137,7 +164,7 @@ void Connection::DisableAutoHeartbeat()
 	m_SendHeartbeats = false;
 }
 
-bool Connection::HeartbeatIsNewer(uint8_t aID)
+bool Connection::HeartbeatIsNewer(uint8_t aID) const
 {
 	if (m_HeartbeatID < aID)
 	{
@@ -161,6 +188,34 @@ bool Connection::HeartbeatIsNewer(uint8_t aID)
 			return false;
 		}
 	}
+}
+
+bool Connection::ACKIsNewer(uint8_t aID) const
+{
+	if (m_newestACKID < aID)
+	{
+		if (aID - m_newestACKID <= UINT8_MAX / 2)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (m_newestACKID - aID >= UINT8_MAX / 2)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return false;
 }
 
 void Connection::UpdateLifetime()

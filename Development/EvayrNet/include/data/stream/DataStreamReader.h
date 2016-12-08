@@ -17,7 +17,7 @@ namespace EvayrNet
 		template <typename Type>
 		void Read(Type& acVar)
 		{
-			acVar = (Type)ReadRaw((uint8_t*)acVar, sizeof(Type));
+			acVar = (Type)ReadRaw((const uint8_t*)acVar, sizeof(Type));
 		}
 
 		void Read(std::string& aVar);

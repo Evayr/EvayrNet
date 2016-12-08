@@ -35,6 +35,8 @@ namespace EvayrNet
 
 		int16_t ProcessIPAddress(IPAddress aIPAddress);
 
+		void ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK);
+
 		void SetConnected(bool aVal);
 		bool IsConnected() const;
 

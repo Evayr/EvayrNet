@@ -3,11 +3,12 @@
 
 #include <cstdint>
 #include <ctime>
-#include <vector>
+#include <list>
 
 #include "data\packet\PacketHandler.h"
 #include "data\messages\MessageTypes.h"
 #include "connection\Connection.h"
+#include "utils\IDGenerator.h"
 
 namespace EvayrNet
 {
@@ -18,6 +19,7 @@ namespace EvayrNet
 		{
 			kRetryConnectInterval = 3000,
 			kConnectionAttempts = 3,
+			kServerConnectionID = 1,
 		};
 		UDPSocket();
 		~UDPSocket();
@@ -27,22 +29,22 @@ namespace EvayrNet
 
 		void Update();
 
-		void AddMessage(std::shared_ptr<Messages::Message> apMessage, Messages::EMessageType aType, int16_t aConnectionID = -1);
+		void AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
 
 		void SetTickRate(uint8_t aTickRateSend);
 
 		void ProcessHeartbeat(const Messages::Heartbeat& acMessage);
 
-		int16_t ProcessIPAddress(IPAddress aIPAddress);
+		int16_t ProcessIPAddress(const IPAddress& aIPAddress);
 
 		void ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK);
 
 		void SetConnected(bool aVal);
 		bool IsConnected() const;
 
-		void AddConnection(IPAddress aIPAddress, bool aSendHeartbeats = false);
+		void AddConnection(const IPAddress& aIPAddress, bool aSendHeartbeats = false);
 		Connection* GetNewestConnection();
-		Connection* GetConnection(int16_t aID);
+		Connection* GetConnection(uint16_t aID);
 		uint8_t GetActiveConnectionsCount() const;
 
 		void SetConnectionID(int16_t aVal);
@@ -58,7 +60,7 @@ namespace EvayrNet
 		void UpdateStatistics();
 		void RemoveTimeIfExceedsAmount(std::list<clock_t>* apList, float aTime = 1000.f);
 
-		void AddConnection(IPAddress aIPAddress, int16_t aConnectionID);
+		void AddConnection(const IPAddress& aIPAddress, uint16_t aConnectionID);
 
 		// Tick rates
 		uint8_t m_TickRateSend;
@@ -81,7 +83,8 @@ namespace EvayrNet
 		PacketHandler* m_pPacketHandler;
 
 		// Connections
-		std::vector<Connection> m_Connections;
+		std::list<Connection> m_Connections;
+		IDGenerator m_ConnectionIDGenerator;
 
 		// Debugging info
 		std::list<clock_t> m_PPSOut; // Packets per second - outgoing

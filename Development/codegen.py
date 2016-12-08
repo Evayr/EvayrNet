@@ -16,7 +16,7 @@ tab = "\t"
 packetSize = 0
 stringLines = []
 stringPreLines = []
-headerSize = 3
+headerSize = 4
 messageOpcode = 0
 
 serializationLines = []
@@ -75,6 +75,8 @@ def StartHeaderFile():
 	h.write(newline)
 	h.write(tab + "virtual uint16_t GetMessageSize(){ return 0; }\n")
 	h.write(tab + "virtual uint8_t GetMessageOpcode(){ return 0; }\n")
+	h.write(newline)
+	h.write(tab + "Messages::EMessageType messageType;\n")
 	h.write("};\n")
 	h.write(newline)
 	return
@@ -153,6 +155,7 @@ def EndMessage(messageName, opcode):
 	cpp.write("{\n")
 	cpp.write(tab + "// Serialize header\n")
 	cpp.write(tab + "aWriter.Write(GetMessageSize()); // message size\n")
+	cpp.write(tab + "aWriter.Write(uint8_t(messageType)); // unreliable, reliable or sequenced\n")
 	cpp.write(tab + "aWriter.Write(uint8_t(" + str(opcode) + ")); // opcode\n")
 	cpp.write(newline)
 	cpp.write(tab + "// Serialize member variables\n")

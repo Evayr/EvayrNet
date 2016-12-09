@@ -42,24 +42,7 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 	{
 		reader.Read(header.size);
 		if (header.size == 0) break;
-
-		reader.Read(header.type);
 		reader.Read(header.opcode);
-		switch (header.type)
-		{
-			case Messages::EMessageType::MESSAGE_RELIABLE:
-			case Messages::EMessageType::MESSAGE_SEQUENCED:
-			{
-				//Messages::MessageHeader ackHeader;
-				//reader.Read(ackHeader.size);
-				//reader.Read(ackHeader.type);
-				//reader.Read(ackHeader.opcode);
-
-				//ack.Deserialize(reader);
-				//g_Network->GetUDPSocket()->GetConnection(ack.connectionID)->ProcessACK(ack);
-				break;
-			}
-		}
 
 		std::unique_ptr<Messages::Message>& pMessage = m_Messages[header.opcode];
 		pMessage->Deserialize(reader);
@@ -113,4 +96,14 @@ void EvayrNet::Messages::MessageHeader_Receive(const Messages::MessageHeader& ac
 
 void EvayrNet::Messages::ACK_Receive(const Messages::ACK& acMessage)
 {
+	Connection* pConnection = g_Network->GetUDPSocket()->GetConnection(acMessage.connectionID);
+
+	if (pConnection)
+	{
+		pConnection->ProcessACK(acMessage);
+	}
+	else
+	{
+		printf("ERROR! ACK with Connection ID %u is nullptr!\n", acMessage.connectionID);
+	}
 }

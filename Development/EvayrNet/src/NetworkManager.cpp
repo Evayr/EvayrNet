@@ -17,6 +17,7 @@ NetworkManager::NetworkManager(uint16_t aPort, bool aIsServer)
 	{
 		m_pNetworkSystem = std::make_unique<NetworkServer>();
 		m_pUDPSocket->SetConnected(true);
+		m_pUDPSocket->SetConnectionID(UDPSocket::kServerConnectionID);
 	}
 	else
 	{

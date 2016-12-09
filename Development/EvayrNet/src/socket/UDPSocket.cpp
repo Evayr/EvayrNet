@@ -8,7 +8,7 @@ UDPSocket::UDPSocket()
 	// Connection
 	: m_Connecting(false)
 	, m_Connected(false)
-	, m_ConnectionID(-1)
+	, m_ConnectionID(0)
 	, m_ConnectionIDGenerator(UINT16_MAX)
 	, m_ConnectClock(0)
 	, m_ConnectionAttempts(0)
@@ -23,7 +23,7 @@ UDPSocket::UDPSocket()
 
 	, m_pPacketHandler(nullptr)
 {
-	m_ConnectionIDGenerator.Skip(); // Make sure clients start with ID 1, so that 0 can be used for invalid IDs
+	m_ConnectionIDGenerator.Skip(2); // Make sure clients start with ID 2, so that 0 can be used for invalid IDs and 1 (kDefaultServerID) for the server
 }
 
 UDPSocket::~UDPSocket()
@@ -60,7 +60,7 @@ void UDPSocket::Disconnect()
 		auto pDisconnectMessage = std::make_shared<Messages::Disconnect>();
 		pDisconnectMessage->connectionID = m_ConnectionID;
 		pDisconnectMessage->reason = Messages::EDisconnectReason::REASON_QUIT;
-		AddMessage(pDisconnectMessage, Messages::EMessageType::MESSAGE_UNRELIABLE);
+		g_Network->Send(pDisconnectMessage, kServerConnectionID);
 		SendPackets(true);
 
 		m_Connected = false;
@@ -78,6 +78,8 @@ void UDPSocket::Update()
 
 void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
+	printf("Adding a message for Connection ID %u called \"%s\"\n", aConnectionID, apMessage->GetMessageName());
+
 	if (aConnectionID == 0)
 	{
 		for (auto& connection : m_Connections)
@@ -115,7 +117,7 @@ void UDPSocket::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 	}
 }
 
-int16_t UDPSocket::ProcessIPAddress(const IPAddress& aIPAddress)
+uint16_t UDPSocket::ProcessIPAddress(const IPAddress& aIPAddress)
 {
 	// Checks if the connection is new. If so, create a new Connection
 	// Returns the ConnectionID of the connection
@@ -142,6 +144,10 @@ void UDPSocket::ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK)
 	if (pConnection)
 	{
 		pConnection->RemoveCachedMessage(acACK.id);
+	}
+	else
+	{
+		printf("ERROR: Trying to Acknowledge ACK for a connection that doesn't exist! Connection ID: %u\n", acACK.connectionID);
 	}
 }
 
@@ -208,12 +214,12 @@ uint8_t UDPSocket::GetActiveConnectionsCount() const
 	return count;
 }
 
-void UDPSocket::SetConnectionID(int16_t aVal)
+void UDPSocket::SetConnectionID(uint16_t aVal)
 {
 	m_ConnectionID = aVal;
 }
 
-int16_t UDPSocket::GetConnectionID() const
+uint16_t UDPSocket::GetConnectionID() const
 {
 	return m_ConnectionID;
 }

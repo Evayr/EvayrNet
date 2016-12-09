@@ -39,5 +39,5 @@ Games that have used this library:
 ### CONTACT ###
 Either PM me on GitHub or mail me at mail{at}evayr[dot]com
 
-### LICENCE ###
-See LICENCE.txt
+### LICENSE ###
+See LICENSE.txt

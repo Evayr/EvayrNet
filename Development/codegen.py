@@ -16,7 +16,7 @@ tab = "\t"
 packetSize = 0
 stringLines = []
 stringPreLines = []
-headerSize = 4
+headerSize = 3
 messageOpcode = 0
 
 serializationLines = []
@@ -75,6 +75,7 @@ def StartHeaderFile():
 	h.write(newline)
 	h.write(tab + "virtual uint16_t GetMessageSize(){ return 0; }\n")
 	h.write(tab + "virtual uint8_t GetMessageOpcode(){ return 0; }\n")
+	h.write(tab + "virtual const char* GetMessageName() { return \"Message\"; }\n")
 	h.write(newline)
 	h.write(tab + "Messages::EMessageType messageType;\n")
 	h.write("};\n")
@@ -132,6 +133,7 @@ def StartMessage(messageName, opcode):
 	h.write(newline)
 	h.write(tab + "uint16_t GetMessageSize();\n")
 	h.write(tab + "uint8_t GetMessageOpcode();\n")
+	h.write(tab + "const char* GetMessageName();\n")
 	h.write(newline)
 	
 	global cpp
@@ -155,7 +157,6 @@ def EndMessage(messageName, opcode):
 	cpp.write("{\n")
 	cpp.write(tab + "// Serialize header\n")
 	cpp.write(tab + "aWriter.Write(GetMessageSize()); // message size\n")
-	cpp.write(tab + "aWriter.Write(uint8_t(messageType)); // unreliable, reliable or sequenced\n")
 	cpp.write(tab + "aWriter.Write(uint8_t(" + str(opcode) + ")); // opcode\n")
 	cpp.write(newline)
 	cpp.write(tab + "// Serialize member variables\n")
@@ -202,6 +203,11 @@ def EndMessage(messageName, opcode):
 	cpp.write("uint8_t " + messageName + "::GetMessageOpcode()\n")
 	cpp.write("{\n")
 	cpp.write(tab + "return " + str(opcode) + ";\n")
+	cpp.write("}\n")
+	cpp.write(newline)
+	cpp.write("const char* " + messageName + "::GetMessageName()\n")
+	cpp.write("{\n")
+	cpp.write(tab + "return \"" + messageName + "\";\n")
 	cpp.write("}\n")
 	cpp.write(newline)
 	Log("End message" + newline)

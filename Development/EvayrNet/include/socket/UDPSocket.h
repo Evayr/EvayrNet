@@ -35,7 +35,7 @@ namespace EvayrNet
 
 		void ProcessHeartbeat(const Messages::Heartbeat& acMessage);
 
-		int16_t ProcessIPAddress(const IPAddress& aIPAddress);
+		uint16_t ProcessIPAddress(const IPAddress& aIPAddress);
 
 		void ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK);
 
@@ -47,8 +47,8 @@ namespace EvayrNet
 		Connection* GetConnection(uint16_t aID);
 		uint8_t GetActiveConnectionsCount() const;
 
-		void SetConnectionID(int16_t aVal);
-		int16_t GetConnectionID() const;
+		void SetConnectionID(uint16_t aVal);
+		uint16_t GetConnectionID() const;
 
 		uint16_t GetPort() const;
 
@@ -70,7 +70,7 @@ namespace EvayrNet
 		// Connecting
 		clock_t m_ConnectClock;
 		uint8_t m_ConnectionAttempts;
-		int16_t m_ConnectionID; // Our connection ID where others can recognize us from
+		uint16_t m_ConnectionID; // Our connection ID where others can recognize us from
 		bool m_Connecting : 1;
 		bool m_Connected : 1;
 

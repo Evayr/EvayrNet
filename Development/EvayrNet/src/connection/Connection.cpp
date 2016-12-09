@@ -30,19 +30,6 @@ void Connection::Update()
 
 void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage)
 {
-	// Add ACK is necessary
-	if (apMessage->messageType != Messages::EMessageType::MESSAGE_UNRELIABLE)
-	{
-		//m_newestSendACKID++;
-		//auto pACK = std::make_shared<Messages::ACK>();
-		//pACK->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
-		//pACK->id = m_newestSendACKID;
-		//pACK->messageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
-		//AddMessage(pACK);
-
-		//AddCachedMessage(apMessage, m_newestSendACKID);
-	}
-
 	// Check if there's a packet available - if not, create a new packet
 	if (m_Packets.size() == 0)
 	{
@@ -55,6 +42,21 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage)
 
 	// Add message
 	m_Packets[m_Packets.size() - 1]->AddMessage(apMessage);
+
+	// Add ACK is necessary
+	if (apMessage->messageType != Messages::EMessageType::MESSAGE_UNRELIABLE)
+	{
+		m_newestSendACKID++;
+		//printf("Adding in an ACK with ID %u for message \"%s\"\n", m_newestSendACKID, apMessage->GetMessageName());
+
+		auto pACK = std::make_shared<Messages::ACK>();
+		pACK->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
+		pACK->id = m_newestSendACKID;
+		pACK->messageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
+		AddMessage(pACK);
+
+		AddCachedMessage(apMessage, m_newestSendACKID);
+	}
 }
 
 void Connection::AddCachedMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID)
@@ -72,6 +74,7 @@ void Connection::RemoveCachedMessage(uint8_t aACKID)
 	{
 		if (m_CachedMessages[i].m_ackID == aACKID)
 		{
+			printf("Removing cached message with ACK ID %u\n", aACKID);
 			m_CachedMessages.erase(m_CachedMessages.begin() + i);
 		}
 	}

@@ -78,7 +78,7 @@ void UDPSocket::Update()
 
 void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
-	printf("Adding a message for Connection ID %u called \"%s\"\n", aConnectionID, apMessage->GetMessageName());
+	//printf("Adding a message for Connection ID %u called \"%s\"\n", aConnectionID, apMessage->GetMessageName());
 
 	if (aConnectionID == 0)
 	{

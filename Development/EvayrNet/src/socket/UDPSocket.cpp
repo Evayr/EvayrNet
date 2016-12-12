@@ -24,6 +24,9 @@ UDPSocket::UDPSocket()
 	, m_pPacketHandler(nullptr)
 {
 	m_ConnectionIDGenerator.Skip(2); // Make sure clients start with ID 2, so that 0 can be used for invalid IDs and 1 (kDefaultServerID) for the server
+
+	Messages::ACK ack;
+	m_ACKMessageSize = ack.GetMessageSize();
 }
 
 UDPSocket::~UDPSocket()
@@ -80,12 +83,15 @@ void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_
 {
 	//printf("Adding a message for Connection ID %u called \"%s\"\n", aConnectionID, apMessage->GetMessageName());
 
+	// Add our connectionID to the message
+	apMessage->m_ConnectionID = m_ConnectionID;
+
 	if (aConnectionID == 0)
 	{
 		for (auto& connection : m_Connections)
 		{
 			if (!connection.IsActive()) continue;
-			connection.AddMessage(apMessage, aStoreACK);
+			connection.AddMessage(apMessage, aStoreACK, (aStoreACK ? m_ACKMessageSize : 0));
 		}
 	}
 	else
@@ -94,7 +100,7 @@ void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_
 
 		if (pConnection)
 		{
-			pConnection->AddMessage(apMessage, aStoreACK);
+			pConnection->AddMessage(apMessage, aStoreACK, (aStoreACK ? m_ACKMessageSize : 0));
 		}
 	}
 }
@@ -143,7 +149,7 @@ void UDPSocket::ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK)
 
 	if (pConnection)
 	{
-		pConnection->RemoveCachedMessage(acACK.id);
+		pConnection->RemoveCachedACKMessage(acACK.id);
 	}
 	else
 	{
@@ -325,4 +331,9 @@ void EvayrNet::Messages::AcknowledgeACK_Receive(const Messages::AcknowledgeACK& 
 void EvayrNet::Messages::Heartbeat_Receive(const Messages::Heartbeat& acMessage)
 {
 	g_Network->GetUDPSocket()->ProcessHeartbeat(acMessage);
+}
+
+void EvayrNet::Messages::PrintText_Receive(const Messages::PrintText& acMessage)
+{
+	printf("Connection ID %i: %s\n", acMessage.m_ConnectionID, acMessage.text.c_str());
 }

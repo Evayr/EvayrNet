@@ -22,7 +22,7 @@ namespace EvayrNet
 			kDefaultConnectionTimout = 5000, // ms
 		};
 
-		struct CachedMessage
+		struct CachedACKMessage
 		{
 			std::shared_ptr<Messages::Message> m_pMessage;
 			uint16_t m_ConnectionID;
@@ -30,19 +30,31 @@ namespace EvayrNet
 			clock_t m_TimeSent;
 		};
 
+		struct SequencedMessage
+		{
+			Messages::Message m_Message;
+			uint8_t m_SequenceID;
+		};
+
 		Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval = kDefaultHeartbeatInterval, uint32_t aConnectionTimeout = kDefaultConnectionTimout);
 		~Connection();
 
 		void Update();
 
-		void AddMessage(const std::shared_ptr<Messages::Message>& apMessage, bool aStoreACK);
-		void AddCachedMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID);
-		void RemoveCachedMessage(uint8_t aACKID);
+		void AddMessage(const std::shared_ptr<Messages::Message>& apMessage, bool aStoreACK, uint16_t aExtraMessageSize = 0);
+
+		// ACK
+		void AddCachedACKMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID);
+		void RemoveCachedACKMessage(uint8_t aACKID);
+
+		// Sequenced
+		void AddCachedSequencedMessage(const Messages::Message& acMessage);
+		void ExecuteSequencedMessages();
 
 		const IPAddress& GetIPAddress();
 		uint8_t GetPacketCount() const;
 		std::shared_ptr<Packet> GetPacket(uint8_t aPacketID);
-		const std::vector<Connection::CachedMessage>& GetCachedMessages();
+		const std::vector<Connection::CachedACKMessage>& GetCachedACKMessages();
 		void ClearPackets();
 
 		uint16_t GetConnectionID() const;
@@ -64,11 +76,13 @@ namespace EvayrNet
 
 		void SendHeartbeat(bool aForceSend);
 		bool ACKIsNewer(uint8_t aID) const;
+		bool SequenceIsNewer(uint8_t aID) const;
 		bool HeartbeatIsNewer(uint8_t aID) const;
 
 		// Sending / receiving data
 		std::vector<std::shared_ptr<Packet>> m_Packets;
-		std::vector<CachedMessage> m_CachedMessages;
+		std::vector<CachedACKMessage> m_CachedACKMessages;
+		std::list<Messages::Message> m_SequencedMessages;
 
 		// Connectivity
 		IPAddress m_IPAddress;
@@ -76,13 +90,17 @@ namespace EvayrNet
 		bool m_Active : 1;
 
 		// ACKs
-		uint8_t m_newestSendACKID;
-		uint8_t m_newestReceiveACKID;
+		uint8_t m_NewestSendACKID;
+		uint8_t m_NewestReceiveACKID;
+
+		// Sequences
+		uint8_t m_NewestSendSequenceID;
+		uint8_t m_NewestReceiveSequenceID;
 
 		// Heartbeat
 		bool m_SendHeartbeats : 1;
-		uint16_t m_heartbeatInterval;
-		uint32_t m_connectionTimeout;
+		uint16_t m_HeartbeatInterval;
+		uint32_t m_ConnectionTimeout;
 		clock_t m_HeartbeatClock;
 		uint8_t m_HeartbeatID;
 

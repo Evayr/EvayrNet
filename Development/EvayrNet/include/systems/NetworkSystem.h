@@ -14,7 +14,6 @@ namespace EvayrNet
 		virtual void OnConnectionRequest(const Messages::ConnectionRequest& acMessage) = 0;
 		virtual void OnConnectionResponse(const Messages::ConnectionResponse& acMessage) = 0;
 		virtual void OnDisconnect(const Messages::Disconnect& acMessage) = 0;
-		virtual void OnClientIPAddresses(const Messages::ClientIPAddresses& acMessage) = 0;
 
 		bool IsServer() const;
 

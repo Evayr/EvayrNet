@@ -82,6 +82,9 @@ namespace EvayrNet
 		// Packet Handler
 		PacketHandler* m_pPacketHandler;
 
+		// Messages
+		uint16_t m_ACKMessageSize;
+
 		// Connections
 		std::list<Connection> m_Connections;
 		IDGenerator m_ConnectionIDGenerator;

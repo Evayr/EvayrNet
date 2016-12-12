@@ -7,10 +7,12 @@ Connection::Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, boo
 	: m_IPAddress(acIPAddress)
 	, m_ConnectionID(aConnectionID)
 	, m_Active(true)
-	, m_heartbeatInterval(aHeartbeatInterval)
-	, m_connectionTimeout(aConnectionTimeout)
-	, m_newestSendACKID(0)
-	, m_newestReceiveACKID(0)
+	, m_HeartbeatInterval(aHeartbeatInterval)
+	, m_ConnectionTimeout(aConnectionTimeout)
+	, m_NewestSendACKID(0)
+	, m_NewestReceiveACKID(0)
+	, m_NewestSendSequenceID(1)
+	, m_NewestReceiveSequenceID(1)
 	, m_HeartbeatClock(clock())
 	, m_HeartbeatID(0)
 	, m_PingClock(clock())
@@ -29,14 +31,14 @@ void Connection::Update()
 	ResendMessages();
 }
 
-void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage, bool aStoreACK)
+void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage, bool aStoreACK, uint16_t aExtraMessageSize)
 {
 	// Check if there's a packet available - if not, create a new packet
 	if (m_Packets.size() == 0)
 	{
 		m_Packets.push_back(std::make_shared<Packet>());
 	}
-	else if (m_Packets[m_Packets.size() - 1]->GetMessagesSize() + apMessage->GetMessageSize() >= Packet::kMaxPacketSize)
+	else if (m_Packets[m_Packets.size() - 1]->GetMessagesSize() + apMessage->GetMessageSize() + aExtraMessageSize >= Packet::kMaxPacketSize)
 	{
 		m_Packets.push_back(std::make_shared<Packet>());
 	}
@@ -44,41 +46,115 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage,
 	// Add message
 	m_Packets[m_Packets.size() - 1]->AddMessage(apMessage);
 
-	// Add ACK is necessary
-	if (apMessage->messageType != Messages::EMessageType::MESSAGE_UNRELIABLE && aStoreACK)
+	// Add ACK is necessary - This can only happen for new messages.
+	// Messages that are re-sent will keep their ACK and Sequence ID.
+	if (apMessage->m_MessageType != Messages::EMessageType::MESSAGE_UNRELIABLE && aStoreACK)
 	{
-		m_newestSendACKID++;
+		// Add Sequence ID if necessary
+		// Apply this first so that the cached ACK message has the correct SequenceID attached to it in case it has to re-send the message
+		if (apMessage->m_MessageType == Messages::EMessageType::MESSAGE_SEQUENCED)
+		{
+			// Apply SequenceID to message
+			apMessage->m_SequenceID = m_NewestSendSequenceID;
+
+			printf("Setting Sequence ID for this message to %i\n", apMessage->m_SequenceID);
+
+			// Increment for next time
+			m_NewestSendSequenceID++;
+
+			// Don't allow SequenceIDs to be 0 - that would mean that there's no SequenceID attached to this message
+			if (m_NewestSendSequenceID == 0)
+			{
+				m_NewestSendSequenceID++;
+			}
+		}
+
+		// Apply ACK
+		m_NewestSendACKID++;
 		//printf("Adding in an ACK with ID %u for message \"%s\"\n", m_newestSendACKID, apMessage->GetMessageName());
 
 		auto pACK = std::make_shared<Messages::ACK>();
 		pACK->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
-		pACK->id = m_newestSendACKID;
-		pACK->messageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
-		AddMessage(pACK, false);
+		pACK->id = m_NewestSendACKID;
+		pACK->m_MessageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
 
-		AddCachedMessage(apMessage, m_newestSendACKID);
+		AddMessage(pACK, false, apMessage->GetMessageSize()); // Make sure the ACK fits in the same packet as the relevant message
+		AddCachedACKMessage(apMessage, m_NewestSendACKID);
 	}
 }
 
-void Connection::AddCachedMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID)
+void Connection::AddCachedACKMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID)
 {
-	CachedMessage message;
+	CachedACKMessage message;
 	message.m_pMessage = apMessage;
 	message.m_ACKID = aACKID;
 	message.m_TimeSent = clock();
 
-	m_CachedMessages.push_back(message);
+	m_CachedACKMessages.push_back(message);
 }
 
-void Connection::RemoveCachedMessage(uint8_t aACKID)
+void Connection::RemoveCachedACKMessage(uint8_t aACKID)
 {
-	for (size_t i = 0; i < m_CachedMessages.size(); ++i)
+	for (size_t i = 0; i < m_CachedACKMessages.size(); ++i)
 	{
-		if (m_CachedMessages[i].m_ACKID == aACKID)
+		if (m_CachedACKMessages[i].m_ACKID == aACKID)
 		{
 			printf("Removing cached message with ACK ID %u\n", aACKID);
-			m_CachedMessages.erase(m_CachedMessages.begin() + i);
+			m_CachedACKMessages.erase(m_CachedACKMessages.begin() + i);
 		}
+	}
+}
+
+void Connection::AddCachedSequencedMessage(const Messages::Message& acMessage)
+{
+	printf("Storing message with Sequence ID %i\n", acMessage.m_SequenceID);
+
+	// Add the message
+	if (m_SequencedMessages.size() == 0)
+	{
+		m_SequencedMessages.push_back(acMessage);
+	}
+	else
+	{
+		// Sort message by putting it into the correct order
+		std::list<Messages::Message>::iterator lowestIt = m_SequencedMessages.begin();
+		for (auto it = m_SequencedMessages.begin(); it != m_SequencedMessages.end(); ++it)
+		{
+			if (acMessage.m_SequenceID < it->m_SequenceID)
+			{
+				lowestIt = it;
+				continue;
+			}
+			break;
+		}
+
+		m_SequencedMessages.insert(lowestIt, acMessage);
+	}
+}
+
+void Connection::ExecuteSequencedMessages()
+{
+	// Execute as many messages as possible
+	for (auto it = m_SequencedMessages.begin(); it != m_SequencedMessages.end();)
+	{
+		if (it->m_SequenceID == m_NewestReceiveSequenceID)
+		{
+			printf("Executing sequenced message \"%s\" with Sequence ID %i\n", it->GetMessageName(), it->m_SequenceID);
+			it->Execute();
+			m_SequencedMessages.erase(it++);
+
+			m_NewestReceiveSequenceID++;
+
+			// Don't allow sequence ID to be 0
+			if (m_NewestReceiveSequenceID == 0)
+			{
+				m_NewestReceiveSequenceID++;
+			}
+			continue;
+		}
+
+		// Our message hasn't arrived yet. Wait for it.
+		break;
 	}
 }
 
@@ -97,9 +173,9 @@ std::shared_ptr<Packet> Connection::GetPacket(uint8_t aPacketID)
 	return m_Packets[aPacketID];
 }
 
-const std::vector<Connection::CachedMessage>& Connection::GetCachedMessages()
+const std::vector<Connection::CachedACKMessage>& Connection::GetCachedACKMessages()
 {
-	return m_CachedMessages;
+	return m_CachedACKMessages;
 }
 
 void Connection::ClearPackets()
@@ -126,14 +202,14 @@ void Connection::ProcessACK(const Messages::ACK& acACK)
 {
 	if (ACKIsNewer(acACK.id))
 	{
-		m_newestReceiveACKID = acACK.id;
+		m_NewestReceiveACKID = acACK.id;
 
 		// Send acknowledgment of the ACK we've been given
 		auto ackSend = std::make_shared<Messages::AcknowledgeACK>();
 		ackSend->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
 		ackSend->id = acACK.id;
 		g_Network->Send(ackSend, acACK.connectionID);
-		printf("Sending ACK Acknowledgment with ID %i\n", m_newestReceiveACKID);
+		printf("Sending ACK Acknowledgment with ID %i\n", m_NewestReceiveACKID);
 	}
 }
 
@@ -207,9 +283,9 @@ bool Connection::HeartbeatIsNewer(uint8_t aID) const
 
 bool Connection::ACKIsNewer(uint8_t aID) const
 {
-	if (m_newestReceiveACKID < aID)
+	if (m_NewestReceiveACKID < aID)
 	{
-		if (aID - m_newestReceiveACKID <= UINT8_MAX / 2)
+		if (aID - m_NewestReceiveACKID <= UINT8_MAX / 2)
 		{
 			return true;
 		}
@@ -220,7 +296,35 @@ bool Connection::ACKIsNewer(uint8_t aID) const
 	}
 	else
 	{
-		if (m_newestReceiveACKID - aID >= UINT8_MAX / 2)
+		if (m_NewestReceiveACKID - aID >= UINT8_MAX / 2)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return false;
+}
+
+bool EvayrNet::Connection::SequenceIsNewer(uint8_t aID) const
+{
+	if (m_NewestReceiveSequenceID < aID)
+	{
+		if (aID - m_NewestReceiveSequenceID <= UINT8_MAX / 2)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (m_NewestReceiveSequenceID - aID >= UINT8_MAX / 2)
 		{
 			return true;
 		}
@@ -237,7 +341,7 @@ void Connection::UpdateLifetime()
 {
 	if (!m_Active) return;
 
-	if (clock() - m_PingClock > m_connectionTimeout)
+	if (uint32_t(clock() - m_PingClock) > m_ConnectionTimeout)
 	{
 		printf("Connection with ID %i has timed out.\n", m_ConnectionID);
 		m_Packets.clear();
@@ -254,15 +358,15 @@ void Connection::ResendMessages()
 {
 	clock_t now = clock();
 
-	for (auto message : m_CachedMessages)
+	for (auto message : m_CachedACKMessages)
 	{
-		if (now - message.m_TimeSent >= m_Ping)
+		if (uint32_t(now - message.m_TimeSent) >= m_Ping)
 		{
 			// Reset timer
 			message.m_TimeSent = now;
 
 			// Re-send it over the network
-			if (message.m_pMessage->messageType == Messages::EMessageType::MESSAGE_RELIABLE)
+			if (message.m_pMessage->m_MessageType == Messages::EMessageType::MESSAGE_RELIABLE)
 			{
 				g_Network->SendReliable(message.m_pMessage, m_ConnectionID, false);
 			}
@@ -279,7 +383,7 @@ void Connection::SendHeartbeat(bool aForceSend)
 	// If it's time to send a heartbeat
 	if (!aForceSend)
 	{
-		if (clock() - m_HeartbeatClock < m_heartbeatInterval) return;
+		if (clock() - m_HeartbeatClock < m_HeartbeatInterval) return;
 		m_HeartbeatClock = clock();
 	}
 

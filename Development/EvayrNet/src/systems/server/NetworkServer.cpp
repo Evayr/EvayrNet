@@ -70,9 +70,3 @@ void NetworkServer::OnDisconnect(const Messages::Disconnect& acMessage)
 		pConnection->SetActive(false);
 	}
 }
-
-void NetworkServer::OnClientIPAddresses(const Messages::ClientIPAddresses& acMessage)
-{
-	// Server doesn't need to process this
-}
-

@@ -2,6 +2,8 @@ MessageHeader
 uint16 size
 uint8 type
 uint8 opcode
+uint8 sequenceID
+uint16 connectionID
 end
 
 ACK
@@ -33,8 +35,6 @@ uint8 reason
 uint16 connectionID
 end
 
-ClientIPAddresses
-string ips array
-uint16 ports array
-uint16 connectionIds array
+PrintText
+string text
 end

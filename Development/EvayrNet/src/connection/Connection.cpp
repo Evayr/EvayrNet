@@ -26,9 +26,10 @@ Connection::~Connection()
 void Connection::Update()
 {
 	UpdateLifetime();
+	ResendMessages();
 }
 
-void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage)
+void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage, bool aStoreACK)
 {
 	// Check if there's a packet available - if not, create a new packet
 	if (m_Packets.size() == 0)
@@ -44,7 +45,7 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage)
 	m_Packets[m_Packets.size() - 1]->AddMessage(apMessage);
 
 	// Add ACK is necessary
-	if (apMessage->messageType != Messages::EMessageType::MESSAGE_UNRELIABLE)
+	if (apMessage->messageType != Messages::EMessageType::MESSAGE_UNRELIABLE && aStoreACK)
 	{
 		m_newestSendACKID++;
 		//printf("Adding in an ACK with ID %u for message \"%s\"\n", m_newestSendACKID, apMessage->GetMessageName());
@@ -53,7 +54,7 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage)
 		pACK->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
 		pACK->id = m_newestSendACKID;
 		pACK->messageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
-		AddMessage(pACK);
+		AddMessage(pACK, false);
 
 		AddCachedMessage(apMessage, m_newestSendACKID);
 	}
@@ -63,7 +64,8 @@ void Connection::AddCachedMessage(const std::shared_ptr<Messages::Message>& apMe
 {
 	CachedMessage message;
 	message.m_pMessage = apMessage;
-	message.m_ackID = aACKID;
+	message.m_ACKID = aACKID;
+	message.m_TimeSent = clock();
 
 	m_CachedMessages.push_back(message);
 }
@@ -72,7 +74,7 @@ void Connection::RemoveCachedMessage(uint8_t aACKID)
 {
 	for (size_t i = 0; i < m_CachedMessages.size(); ++i)
 	{
-		if (m_CachedMessages[i].m_ackID == aACKID)
+		if (m_CachedMessages[i].m_ACKID == aACKID)
 		{
 			printf("Removing cached message with ACK ID %u\n", aACKID);
 			m_CachedMessages.erase(m_CachedMessages.begin() + i);
@@ -127,10 +129,11 @@ void Connection::ProcessACK(const Messages::ACK& acACK)
 		m_newestReceiveACKID = acACK.id;
 
 		// Send acknowledgment of the ACK we've been given
-		auto ackSend = std::make_unique<Messages::AcknowledgeACK>();
+		auto ackSend = std::make_shared<Messages::AcknowledgeACK>();
 		ackSend->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
 		ackSend->id = acACK.id;
-		g_Network->Send(std::move(ackSend), acACK.connectionID);
+		g_Network->Send(ackSend, acACK.connectionID);
+		printf("Sending ACK Acknowledgment with ID %i\n", m_newestReceiveACKID);
 	}
 }
 
@@ -244,6 +247,30 @@ void Connection::UpdateLifetime()
 	if (m_SendHeartbeats)
 	{
 		SendHeartbeat(false);
+	}
+}
+
+void Connection::ResendMessages()
+{
+	clock_t now = clock();
+
+	for (auto message : m_CachedMessages)
+	{
+		if (now - message.m_TimeSent >= m_Ping)
+		{
+			// Reset timer
+			message.m_TimeSent = now;
+
+			// Re-send it over the network
+			if (message.m_pMessage->messageType == Messages::EMessageType::MESSAGE_RELIABLE)
+			{
+				g_Network->SendReliable(message.m_pMessage, m_ConnectionID, false);
+			}
+			else
+			{
+				g_Network->SendSequenced(message.m_pMessage, m_ConnectionID, false);
+			}
+		}
 	}
 }
 

@@ -76,7 +76,7 @@ void UDPSocket::Update()
 	UpdateStatistics();
 }
 
-void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
+void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
 	//printf("Adding a message for Connection ID %u called \"%s\"\n", aConnectionID, apMessage->GetMessageName());
 
@@ -85,7 +85,7 @@ void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_
 		for (auto& connection : m_Connections)
 		{
 			if (!connection.IsActive()) continue;
-			connection.AddMessage(apMessage);
+			connection.AddMessage(apMessage, aStoreACK);
 		}
 	}
 	else
@@ -94,7 +94,7 @@ void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_
 
 		if (pConnection)
 		{
-			pConnection->AddMessage(apMessage);
+			pConnection->AddMessage(apMessage, aStoreACK);
 		}
 	}
 }

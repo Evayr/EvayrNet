@@ -27,8 +27,8 @@ namespace EvayrNet
 		void Disconnect();
 
 		void Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
-		void SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
-		void SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
+		void SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0, bool aStoreACK = true);
+		void SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0, bool aStoreACK = true);
 
 		void RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode);
 

@@ -21,6 +21,8 @@ void NetworkClient::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 
 void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acMessage)
 {
+	if (g_Network->GetUDPSocket()->IsConnected()) return;
+
 	switch (acMessage.response)
 	{
 		case Messages::EConnectionResult::RESULT_SUCCESS:

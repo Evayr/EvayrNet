@@ -60,19 +60,19 @@ void NetworkManager::Disconnect()
 void NetworkManager::Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
 	apMessage->messageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID);
+	m_pUDPSocket->AddMessage(apMessage, aConnectionID, false);
 }
 
-void NetworkManager::SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
+void NetworkManager::SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
 	apMessage->messageType = Messages::EMessageType::MESSAGE_RELIABLE;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID);
+	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
-void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
+void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
 	apMessage->messageType = Messages::EMessageType::MESSAGE_SEQUENCED;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID);
+	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
 void NetworkManager::RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode)

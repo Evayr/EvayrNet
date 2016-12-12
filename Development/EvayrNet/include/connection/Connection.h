@@ -25,7 +25,9 @@ namespace EvayrNet
 		struct CachedMessage
 		{
 			std::shared_ptr<Messages::Message> m_pMessage;
-			uint8_t m_ackID;
+			uint16_t m_ConnectionID;
+			uint8_t m_ACKID;
+			clock_t m_TimeSent;
 		};
 
 		Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, bool aSendHeartbeats, uint16_t aHeartbeatInterval = kDefaultHeartbeatInterval, uint32_t aConnectionTimeout = kDefaultConnectionTimout);
@@ -33,7 +35,7 @@ namespace EvayrNet
 
 		void Update();
 
-		void AddMessage(const std::shared_ptr<Messages::Message>& apMessage);
+		void AddMessage(const std::shared_ptr<Messages::Message>& apMessage, bool aStoreACK);
 		void AddCachedMessage(const std::shared_ptr<Messages::Message>& apMessage, uint8_t aACKID);
 		void RemoveCachedMessage(uint8_t aACKID);
 
@@ -57,9 +59,11 @@ namespace EvayrNet
 		void DisableAutoHeartbeat();
 
 	private:
-		bool ACKIsNewer(uint8_t aID) const;
 		void UpdateLifetime();
+		void ResendMessages();
+
 		void SendHeartbeat(bool aForceSend);
+		bool ACKIsNewer(uint8_t aID) const;
 		bool HeartbeatIsNewer(uint8_t aID) const;
 
 		// Sending / receiving data

@@ -335,5 +335,5 @@ void EvayrNet::Messages::Heartbeat_Receive(const Messages::Heartbeat& acMessage)
 
 void EvayrNet::Messages::PrintText_Receive(const Messages::PrintText& acMessage)
 {
-	printf("Connection ID %i: %s\n", acMessage.m_ConnectionID, acMessage.text.c_str());
+	printf("Connection ID %i: \"%s\"\n", acMessage.m_ConnectionID, acMessage.text.c_str());
 }

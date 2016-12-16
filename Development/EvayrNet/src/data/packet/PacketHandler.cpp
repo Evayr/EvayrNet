@@ -42,17 +42,17 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 	{
 		// Read message header
 		reader.Read(header.size);
-		if (header.size == 0) break; // Packet is corrupt / spoofed / invalid. Stop reading.
+		if (header.size == 0) break; // Packet is corrupt / spoofed / invalid. Stop reading and discard the message.
 		reader.Read(header.opcode);
 		reader.Read(header.sequenceID);
 		reader.Read(header.connectionID);
 
 		// Deserialize message
-		std::unique_ptr<Messages::Message>& pMessage = m_Messages[header.opcode];
+		std::shared_ptr<Messages::Message> pMessage = m_Messages[header.opcode]->CreateInstance();
 		pMessage->Deserialize(reader);
 
 		// Process SequenceID if it has one
-		if (header.sequenceID == 0)
+		if (header.sequenceID == 0 || header.opcode == ack.GetMessageOpcode())
 		{
 			pMessage->Execute();
 		}
@@ -62,8 +62,8 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 			Connection* pConnection = g_Network->GetUDPSocket()->GetConnection(header.connectionID);
 			if (pConnection)
 			{
-				pMessage->m_SequenceID = header.connectionID;
-				pConnection->AddCachedSequencedMessage(*pMessage.get());
+				pMessage->m_SequenceID = header.sequenceID;
+				pConnection->AddCachedSequencedMessage(pMessage);
 				pConnection->ExecuteSequencedMessages();
 			}
 		}

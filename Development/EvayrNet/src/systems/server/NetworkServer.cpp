@@ -35,7 +35,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 {
 	if (g_Network->GetUDPSocket()->GetActiveConnectionsCount() < m_MaxPlayerCount)
 	{
-		printf("Client accepted\n");
+		printf("Client accepted. Connection ID: %u\n", g_Network->GetUDPSocket()->GetNewestConnection()->GetConnectionID());
 
 		// Welcome the client
 		auto pMessage = std::make_shared<Messages::ConnectionResponse>();

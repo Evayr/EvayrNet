@@ -20,6 +20,7 @@ namespace EvayrNet
 		{
 			kDefaultHeartbeatInterval = 250, // ms
 			kDefaultConnectionTimout = 5000, // ms
+			kResendDelay = 5, // ms - rough estimation for the processing delay / ping differential
 		};
 
 		struct CachedACKMessage
@@ -48,7 +49,7 @@ namespace EvayrNet
 		void RemoveCachedACKMessage(uint8_t aACKID);
 
 		// Sequenced
-		void AddCachedSequencedMessage(const Messages::Message& acMessage);
+		void AddCachedSequencedMessage(std::shared_ptr<Messages::Message> apMessage);
 		void ExecuteSequencedMessages();
 
 		const IPAddress& GetIPAddress();
@@ -82,7 +83,7 @@ namespace EvayrNet
 		// Sending / receiving data
 		std::vector<std::shared_ptr<Packet>> m_Packets;
 		std::vector<CachedACKMessage> m_CachedACKMessages;
-		std::list<Messages::Message> m_SequencedMessages;
+		std::list<std::shared_ptr<Messages::Message>> m_SequencedMessages;
 
 		// Connectivity
 		IPAddress m_IPAddress;

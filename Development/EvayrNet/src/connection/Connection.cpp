@@ -57,7 +57,7 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage,
 			// Apply SequenceID to message
 			apMessage->m_SequenceID = m_NewestSendSequenceID;
 
-			printf("Setting Sequence ID for this message to %i\n", apMessage->m_SequenceID);
+			//printf("Setting Sequence ID for this message to %i\n", apMessage->m_SequenceID);
 
 			// Increment for next time
 			m_NewestSendSequenceID++;
@@ -99,28 +99,42 @@ void Connection::RemoveCachedACKMessage(uint8_t aACKID)
 	{
 		if (m_CachedACKMessages[i].m_ACKID == aACKID)
 		{
-			printf("Removing cached message with ACK ID %u\n", aACKID);
+			//printf("Removing cached message with ACK ID %u\n", aACKID);
 			m_CachedACKMessages.erase(m_CachedACKMessages.begin() + i);
 		}
 	}
 }
 
-void Connection::AddCachedSequencedMessage(const Messages::Message& acMessage)
+void Connection::AddCachedSequencedMessage(std::shared_ptr<Messages::Message> apMessage)
 {
-	printf("Storing message with Sequence ID %i\n", acMessage.m_SequenceID);
-
 	// Add the message
 	if (m_SequencedMessages.size() == 0)
 	{
-		m_SequencedMessages.push_back(acMessage);
+		//printf("Storing message with Sequence ID %i\n", apMessage->m_SequenceID);
+		m_SequencedMessages.push_back(apMessage);
 	}
 	else
 	{
-		// Sort message by putting it into the correct order
-		std::list<Messages::Message>::iterator lowestIt = m_SequencedMessages.begin();
-		for (auto it = m_SequencedMessages.begin(); it != m_SequencedMessages.end(); ++it)
+		// Don't add previous messages
+		if (!SequenceIsNewer(apMessage->m_SequenceID)) return;
+
+		// Don't duplicate newer messages
+		bool hasMessage = false;
+		for (auto& it = m_SequencedMessages.begin(); it != m_SequencedMessages.end(); ++it)
 		{
-			if (acMessage.m_SequenceID < it->m_SequenceID)
+			if ((*it)->m_SequenceID == apMessage->m_SequenceID)
+			{
+				hasMessage = true;
+				break;
+			}
+		}
+		if (hasMessage) return;
+
+		// Sort message by putting it into the correct order
+		auto& lowestIt = m_SequencedMessages.begin();
+		for (auto& it = m_SequencedMessages.begin(); it != m_SequencedMessages.end(); ++it)
+		{
+			if (apMessage->m_SequenceID < (*it)->m_SequenceID)
 			{
 				lowestIt = it;
 				continue;
@@ -128,19 +142,20 @@ void Connection::AddCachedSequencedMessage(const Messages::Message& acMessage)
 			break;
 		}
 
-		m_SequencedMessages.insert(lowestIt, acMessage);
+		//printf("Storing message with Sequence ID %i\n", apMessage->m_SequenceID);
+		m_SequencedMessages.insert(lowestIt, apMessage);
 	}
 }
 
 void Connection::ExecuteSequencedMessages()
 {
 	// Execute as many messages as possible
-	for (auto it = m_SequencedMessages.begin(); it != m_SequencedMessages.end();)
+	for (auto& it = m_SequencedMessages.begin(); it != m_SequencedMessages.end();)
 	{
-		if (it->m_SequenceID == m_NewestReceiveSequenceID)
+		if ((*it)->m_SequenceID == m_NewestReceiveSequenceID)
 		{
-			printf("Executing sequenced message \"%s\" with Sequence ID %i\n", it->GetMessageName(), it->m_SequenceID);
-			it->Execute();
+			//printf("Executing sequenced message \"%s\" with Sequence ID %i\n", (*it)->GetMessageName(), (*it)->m_SequenceID);
+			(*it)->Execute();
 			m_SequencedMessages.erase(it++);
 
 			m_NewestReceiveSequenceID++;
@@ -209,7 +224,7 @@ void Connection::ProcessACK(const Messages::ACK& acACK)
 		ackSend->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
 		ackSend->id = acACK.id;
 		g_Network->Send(ackSend, acACK.connectionID);
-		printf("Sending ACK Acknowledgment with ID %i\n", m_NewestReceiveACKID);
+		//printf("Sending ACK Acknowledgment with ID %i\n", m_NewestReceiveACKID);
 	}
 }
 
@@ -360,8 +375,10 @@ void Connection::ResendMessages()
 
 	for (auto message : m_CachedACKMessages)
 	{
-		if (uint32_t(now - message.m_TimeSent) >= m_Ping)
+		if (uint32_t(now - message.m_TimeSent) >= m_Ping + kResendDelay)
 		{
+			//printf("Resending message \"%s\". SequenceID: %u\n", message.m_pMessage->GetMessageName(), message.m_pMessage->m_SequenceID);
+
 			// Reset timer
 			message.m_TimeSent = now;
 

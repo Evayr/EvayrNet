@@ -53,6 +53,7 @@ def StartHeaderFile():
 	h.write(newline)
 	h.write("#include <vector>\n")
 	h.write("#include <string>\n")
+	h.write("#include <memory>\n")
 	h.write(newline)
 	h.write("#include \"data\\messages\\MessageTypes.h\"\n")
 	h.write(newline)
@@ -77,6 +78,8 @@ def StartHeaderFile():
 	h.write(tab + "virtual uint16_t GetMessageSize(){ return 0; }\n")
 	h.write(tab + "virtual uint8_t GetMessageOpcode(){ return 0; }\n")
 	h.write(tab + "virtual const char* GetMessageName() { return \"Message\"; }\n")
+	h.write(newline)
+	h.write(tab + "virtual std::shared_ptr<Message> CreateInstance();\n")
 	h.write(newline)
 	h.write(tab + "Messages::EMessageType m_MessageType;\n")
 	h.write(tab + "uint8_t m_SequenceID; // If this is 0, there is no sequence\n")
@@ -111,6 +114,11 @@ def StartSourceFile():
 	cpp.write("Message::Message() : m_SequenceID(0), m_ConnectionID(0) {}\n")
 	cpp.write("Message::~Message() {}\n")
 	cpp.write(newline)
+	cpp.write("std::shared_ptr<Message> Message::CreateInstance()\n")
+	cpp.write("{\n")
+	cpp.write(tab + "return std::move(std::make_unique<Message>());\n")
+	cpp.write("}\n")
+	cpp.write(newline)
 	return
 	
 def EndSourceFile():
@@ -138,6 +146,8 @@ def StartMessage(messageName, opcode):
 	h.write(tab + "uint16_t GetMessageSize();\n")
 	h.write(tab + "uint8_t GetMessageOpcode();\n")
 	h.write(tab + "const char* GetMessageName();\n")
+	h.write(newline)
+	h.write(tab + "std::shared_ptr<Message> CreateInstance();\n")
 	h.write(newline)
 	
 	global cpp
@@ -216,6 +226,11 @@ def EndMessage(messageName, opcode):
 	cpp.write("const char* " + messageName + "::GetMessageName()\n")
 	cpp.write("{\n")
 	cpp.write(tab + "return \"" + messageName + "\";\n")
+	cpp.write("}\n")
+	cpp.write(newline)
+	cpp.write("std::shared_ptr<Message> " + messageName + "::CreateInstance()\n")
+	cpp.write("{\n")
+	cpp.write(tab + "return std::move(std::make_unique<" + messageName + ">());\n")
 	cpp.write("}\n")
 	cpp.write(newline)
 	Log("End message" + newline)

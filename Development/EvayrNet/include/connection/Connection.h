@@ -26,7 +26,6 @@ namespace EvayrNet
 		struct CachedACKMessage
 		{
 			std::shared_ptr<Messages::Message> m_pMessage;
-			uint16_t m_ConnectionID;
 			uint8_t m_ACKID;
 			clock_t m_TimeSent;
 		};

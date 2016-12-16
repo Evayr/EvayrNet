@@ -42,6 +42,12 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 		pMessage->response = Messages::EConnectionResult::RESULT_SUCCESS;
 		pMessage->connectionID = g_Network->GetUDPSocket()->GetNewestConnection()->GetConnectionID();
 		g_Network->SendReliable(pMessage, pMessage->connectionID);
+
+		// Send callback to application
+		if (m_OnPlayerAdd)
+		{
+			m_OnPlayerAdd(g_Network->GetUDPSocket()->GetNewestConnection()->GetConnectionID());
+		}
 	}
 	else
 	{
@@ -68,5 +74,11 @@ void NetworkServer::OnDisconnect(const Messages::Disconnect& acMessage)
 	{
 		printf("Connection ID %i has disconnected.\n", acMessage.connectionID);
 		pConnection->SetActive(false);
+
+		// Send callback to application
+		if (m_OnPlayerDisconnect)
+		{
+			m_OnPlayerDisconnect(pConnection->GetConnectionID(), Messages::EDisconnectReason::REASON_QUIT);
+		}
 	}
 }

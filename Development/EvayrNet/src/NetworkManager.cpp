@@ -85,6 +85,26 @@ void NetworkManager::SetTickRate(uint8_t aSendTickRate)
 	m_pUDPSocket->SetTickRate(aSendTickRate);
 }
 
+void NetworkManager::RegisterOnConnectionResultCallback(std::function<void(EvayrNet::Messages::EConnectionResult)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnConnectionResultCallback(aCallback);
+}
+
+void NetworkManager::RegisterOnDisconnectCallback(std::function<void(EvayrNet::Messages::EDisconnectReason)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnDisconnectCallback(aCallback);
+}
+
+void NetworkManager::RegisterOnPlayerAddCallback(std::function<void(uint16_t)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnPlayerAddCallback(aCallback);
+}
+
+void NetworkManager::RegisterOnPlayerDisconnectCallback(std::function<void(uint16_t, EvayrNet::Messages::EDisconnectReason)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnPlayerDisconnectCallback(aCallback);
+}
+
 bool NetworkManager::IsConnected() const
 {
 	return m_pUDPSocket->IsConnected();

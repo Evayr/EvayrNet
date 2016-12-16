@@ -55,6 +55,12 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 			break;
 		}
 	}
+
+	// Send callback to application
+	if (m_OnConnectionResult)
+	{
+		m_OnConnectionResult(Messages::EConnectionResult(acMessage.response));
+	}
 }
 
 void NetworkClient::OnDisconnect(const Messages::Disconnect& acMessage)
@@ -89,6 +95,12 @@ void NetworkClient::OnDisconnect(const Messages::Disconnect& acMessage)
 	if (acMessage.connectionID == 0)
 	{
 		g_Network->GetUDPSocket()->SetConnected(false);
+
+		// Send callback to application
+		if (m_OnDisconnect)
+		{
+			m_OnDisconnect(Messages::EDisconnectReason(acMessage.reason));
+		}
 	}
 	else
 	{
@@ -96,6 +108,12 @@ void NetworkClient::OnDisconnect(const Messages::Disconnect& acMessage)
 		if (pConnection)
 		{
 			pConnection->SetActive(false);
+		}
+
+		// Send callback to application
+		if (m_OnPlayerDisconnect)
+		{
+			m_OnPlayerDisconnect(acMessage.connectionID, Messages::EDisconnectReason(acMessage.reason));
 		}
 	}
 }

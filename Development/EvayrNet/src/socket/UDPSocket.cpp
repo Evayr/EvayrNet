@@ -63,6 +63,11 @@ void UDPSocket::Disconnect()
 		auto pDisconnectMessage = std::make_shared<Messages::Disconnect>();
 		pDisconnectMessage->connectionID = m_ConnectionID;
 		pDisconnectMessage->reason = Messages::EDisconnectReason::REASON_QUIT;
+
+		// Send callback to application
+		g_Network->GetNetworkSystem()->OnDisconnect(*pDisconnectMessage);
+
+		// Send message
 		g_Network->Send(pDisconnectMessage, kServerConnectionID);
 		SendPackets(true);
 

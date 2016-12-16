@@ -40,12 +40,33 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 
 	while(bytesRead < packetSize)
 	{
+		// Read message header
 		reader.Read(header.size);
-		if (header.size == 0) break;
+		if (header.size == 0) break; // Packet is corrupt / spoofed / invalid. Stop reading and discard the message.
 		reader.Read(header.opcode);
+		reader.Read(header.sequenceID);
+		reader.Read(header.connectionID);
 
-		std::unique_ptr<Messages::Message>& pMessage = m_Messages[header.opcode];
+		// Deserialize message
+		std::shared_ptr<Messages::Message> pMessage = m_Messages[header.opcode]->CreateInstance();
 		pMessage->Deserialize(reader);
+
+		// Process SequenceID if it has one
+		if (header.sequenceID == 0 || header.opcode == ack.GetMessageOpcode())
+		{
+			pMessage->Execute();
+		}
+		else
+		{
+			// Store sequenced message, execute it if possible
+			Connection* pConnection = g_Network->GetUDPSocket()->GetConnection(header.connectionID);
+			if (pConnection)
+			{
+				pMessage->m_SequenceID = header.sequenceID;
+				pConnection->AddCachedSequencedMessage(pMessage);
+				pConnection->ExecuteSequencedMessages();
+			}
+		}
 
 		bytesRead += header.size;
 	}
@@ -81,9 +102,9 @@ void PacketHandler::RegisterDefaultMessages()
 	auto pDisconnect = std::make_unique<Messages::Disconnect>();
 	RegisterMessage(std::move(pDisconnect), pDisconnect->GetMessageOpcode());
 
-	// Client IP Addresses
-	auto pClientIPAddresses = std::make_unique<Messages::ClientIPAddresses>();
-	RegisterMessage(std::move(pClientIPAddresses), pClientIPAddresses->GetMessageOpcode());
+	// Print Text
+	auto pPrintText = std::make_unique<Messages::PrintText>();
+	RegisterMessage(std::move(pPrintText), pPrintText->GetMessageOpcode());
 }
 
 void PacketHandler::ProcessMessage()

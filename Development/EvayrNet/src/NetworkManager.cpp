@@ -59,20 +59,20 @@ void NetworkManager::Disconnect()
 
 void NetworkManager::Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
-	apMessage->messageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID);
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
+	m_pUDPSocket->AddMessage(apMessage, aConnectionID, false);
 }
 
-void NetworkManager::SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
+void NetworkManager::SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
-	apMessage->messageType = Messages::EMessageType::MESSAGE_RELIABLE;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID);
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_RELIABLE;
+	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
-void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
+void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
-	apMessage->messageType = Messages::EMessageType::MESSAGE_SEQUENCED;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID);
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_SEQUENCED;
+	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
 void NetworkManager::RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode)
@@ -83,6 +83,26 @@ void NetworkManager::RegisterMessage(std::unique_ptr<Messages::Message> apMessag
 void NetworkManager::SetTickRate(uint8_t aSendTickRate)
 {
 	m_pUDPSocket->SetTickRate(aSendTickRate);
+}
+
+void NetworkManager::RegisterOnConnectionResultCallback(std::function<void(EvayrNet::Messages::EConnectionResult)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnConnectionResultCallback(aCallback);
+}
+
+void NetworkManager::RegisterOnDisconnectCallback(std::function<void(EvayrNet::Messages::EDisconnectReason)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnDisconnectCallback(aCallback);
+}
+
+void NetworkManager::RegisterOnPlayerAddCallback(std::function<void(uint16_t)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnPlayerAddCallback(aCallback);
+}
+
+void NetworkManager::RegisterOnPlayerDisconnectCallback(std::function<void(uint16_t, EvayrNet::Messages::EDisconnectReason)> aCallback)
+{
+	m_pNetworkSystem->RegisterOnPlayerDisconnectCallback(aCallback);
 }
 
 bool NetworkManager::IsConnected() const

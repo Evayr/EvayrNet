@@ -29,7 +29,7 @@ namespace EvayrNet
 
 		void Update();
 
-		void AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
+		void AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0, bool aStoreACK = false);
 
 		void SetTickRate(uint8_t aTickRateSend);
 
@@ -81,6 +81,9 @@ namespace EvayrNet
 
 		// Packet Handler
 		PacketHandler* m_pPacketHandler;
+
+		// Messages
+		uint16_t m_ACKMessageSize;
 
 		// Connections
 		std::list<Connection> m_Connections;

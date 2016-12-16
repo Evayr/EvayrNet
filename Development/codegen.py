@@ -16,7 +16,7 @@ tab = "\t"
 packetSize = 0
 stringLines = []
 stringPreLines = []
-headerSize = 3
+headerSize = 6
 messageOpcode = 0
 
 serializationLines = []
@@ -53,6 +53,7 @@ def StartHeaderFile():
 	h.write(newline)
 	h.write("#include <vector>\n")
 	h.write("#include <string>\n")
+	h.write("#include <memory>\n")
 	h.write(newline)
 	h.write("#include \"data\\messages\\MessageTypes.h\"\n")
 	h.write(newline)
@@ -72,12 +73,17 @@ def StartHeaderFile():
 	h.write(newline)
 	h.write(tab + "virtual void Serialize(EvayrNet::DataStreamWriter& aWriter){}\n")
 	h.write(tab + "virtual void Deserialize(EvayrNet::DataStreamReader& aReader){}\n")
+	h.write(tab + "virtual void Execute(){}\n")
 	h.write(newline)
 	h.write(tab + "virtual uint16_t GetMessageSize(){ return 0; }\n")
 	h.write(tab + "virtual uint8_t GetMessageOpcode(){ return 0; }\n")
 	h.write(tab + "virtual const char* GetMessageName() { return \"Message\"; }\n")
 	h.write(newline)
-	h.write(tab + "Messages::EMessageType messageType;\n")
+	h.write(tab + "virtual std::shared_ptr<Message> CreateInstance();\n")
+	h.write(newline)
+	h.write(tab + "Messages::EMessageType m_MessageType;\n")
+	h.write(tab + "uint8_t m_SequenceID; // If this is 0, there is no sequence\n")
+	h.write(tab + "uint16_t m_ConnectionID; // ConnectionID from the sender\n")
 	h.write("};\n")
 	h.write(newline)
 	return
@@ -105,8 +111,13 @@ def StartSourceFile():
 	cpp.write("namespace Messages\n")
 	cpp.write("{\n")
 	cpp.write(newline)
-	cpp.write("Message::Message() {}\n")
+	cpp.write("Message::Message() : m_SequenceID(0), m_ConnectionID(0) {}\n")
 	cpp.write("Message::~Message() {}\n")
+	cpp.write(newline)
+	cpp.write("std::shared_ptr<Message> Message::CreateInstance()\n")
+	cpp.write("{\n")
+	cpp.write(tab + "return std::move(std::make_unique<Message>());\n")
+	cpp.write("}\n")
 	cpp.write(newline)
 	return
 	
@@ -130,10 +141,13 @@ def StartMessage(messageName, opcode):
 	h.write(newline)	
 	h.write(tab + "void Serialize(EvayrNet::DataStreamWriter& aWriter);\n")
 	h.write(tab + "void Deserialize(EvayrNet::DataStreamReader& aReader);\n")
+	h.write(tab + "void Execute();\n")
 	h.write(newline)
 	h.write(tab + "uint16_t GetMessageSize();\n")
 	h.write(tab + "uint8_t GetMessageOpcode();\n")
 	h.write(tab + "const char* GetMessageName();\n")
+	h.write(newline)
+	h.write(tab + "std::shared_ptr<Message> CreateInstance();\n")
 	h.write(newline)
 	
 	global cpp
@@ -158,6 +172,8 @@ def EndMessage(messageName, opcode):
 	cpp.write(tab + "// Serialize header\n")
 	cpp.write(tab + "aWriter.Write(GetMessageSize()); // message size\n")
 	cpp.write(tab + "aWriter.Write(uint8_t(" + str(opcode) + ")); // opcode\n")
+	cpp.write(tab + "aWriter.Write(m_SequenceID); // sequence ID\n")
+	cpp.write(tab + "aWriter.Write(m_ConnectionID); // connection ID\n")
 	cpp.write(newline)
 	cpp.write(tab + "// Serialize member variables\n")
 	si = 0;
@@ -174,8 +190,10 @@ def EndMessage(messageName, opcode):
 	while di < len(deserializationLines):
 		cpp.write(deserializationLines[di])
 		di += 1
+	cpp.write("}\n")
 	cpp.write(newline)
-	cpp.write(tab + "// Notify receiver that a message has been processed\n")
+	cpp.write("void " + messageName + "::Execute()\n")
+	cpp.write("{\n")
 	cpp.write(tab + messageName + "_Receive(*this);\n")
 	cpp.write("}\n")
 	cpp.write(newline)
@@ -208,6 +226,11 @@ def EndMessage(messageName, opcode):
 	cpp.write("const char* " + messageName + "::GetMessageName()\n")
 	cpp.write("{\n")
 	cpp.write(tab + "return \"" + messageName + "\";\n")
+	cpp.write("}\n")
+	cpp.write(newline)
+	cpp.write("std::shared_ptr<Message> " + messageName + "::CreateInstance()\n")
+	cpp.write("{\n")
+	cpp.write(tab + "return std::move(std::make_unique<" + messageName + ">());\n")
 	cpp.write("}\n")
 	cpp.write(newline)
 	Log("End message" + newline)

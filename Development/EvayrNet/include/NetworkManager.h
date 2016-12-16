@@ -2,6 +2,7 @@
 #define _NETWORKMANAGER_H_
 
 #include <memory>
+#include <functional>
 
 #include "data\packet\PacketHandler.h"
 #include "socket\UDPSocket.h"
@@ -27,12 +28,17 @@ namespace EvayrNet
 		void Disconnect();
 
 		void Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
-		void SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
-		void SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0);
+		void SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0, bool aStoreACK = true);
+		void SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID = 0, bool aStoreACK = true);
 
 		void RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode);
 
 		void SetTickRate(uint8_t aSendTickRate = kDefaultTickRate);
+
+		void RegisterOnConnectionResultCallback(std::function<void(EvayrNet::Messages::EConnectionResult)> aCallback);
+		void RegisterOnDisconnectCallback(std::function<void(EvayrNet::Messages::EDisconnectReason)> aCallback);
+		void RegisterOnPlayerAddCallback(std::function<void(uint16_t)> aCallback);
+		void RegisterOnPlayerDisconnectCallback(std::function<void(uint16_t, EvayrNet::Messages::EDisconnectReason)> aCallback);
 
 		bool IsConnected() const;
 

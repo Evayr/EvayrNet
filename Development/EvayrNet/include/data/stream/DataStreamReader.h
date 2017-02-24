@@ -23,6 +23,10 @@ namespace EvayrNet
 		void Read(std::string& aVar);
 		void Read(float& aVar);
 		void Read(double& aVar);
+		void Read(int16_t& aVar);
+		void Read(int8_t& aVar);
+		void Read(uint16_t& aVar);
+		void Read(uint8_t& aVar);
 
 		void SkipBytes(uint32_t aLength);
 

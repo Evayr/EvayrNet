@@ -33,3 +33,23 @@ void DataStreamWriter::Write(const double& acVar)
 {
 	WriteRaw((const uint8_t*)&acVar, sizeof(double));
 }
+
+void EvayrNet::DataStreamWriter::Write(const int16_t& acVar)
+{
+	WriteRaw((const uint8_t*)&acVar, sizeof(int16_t));
+}
+
+void EvayrNet::DataStreamWriter::Write(const int8_t& acVar)
+{
+	WriteRaw((const uint8_t*)&acVar, sizeof(int8_t));
+}
+
+void DataStreamWriter::Write(const uint16_t& acVar)
+{
+	WriteRaw((const uint8_t*)&acVar, sizeof(uint16_t));
+}
+
+void DataStreamWriter::Write(const uint8_t& acVar)
+{
+	WriteRaw((const uint8_t*)&acVar, sizeof(uint8_t));
+}

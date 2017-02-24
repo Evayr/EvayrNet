@@ -207,15 +207,14 @@ def EndMessage(messageName, opcode):
 			cpp.write(stringPreLines[strpi])
 			strpi += 1
 		cpp.write(newline)
-	cpp.write(tab + "return " + str(packetSize + headerSize))
+	cpp.write(tab + "return uint16_t(" + str(packetSize + headerSize))
 	stri = 0;
 	while stri < len(stringLines):
 		cpp.write(stringLines[stri])
 		stri += 1
-	if len(stringPreLines) == 0:
-		cpp.write(";\n")
-	else:
-		cpp.write(" + arraysSize;\n")
+	if len(stringPreLines) != 0:
+		cpp.write(" + arraysSize")
+	cpp.write(");\n")
 	cpp.write("}\n")
 	cpp.write(newline)
 	cpp.write("uint8_t " + messageName + "::GetMessageOpcode()\n")

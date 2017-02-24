@@ -23,6 +23,10 @@ namespace EvayrNet
 		void Write(const std::string& acVar);
 		void Write(const float& acVar);
 		void Write(const double& acVar);
+		void Write(const int16_t& acVar);
+		void Write(const int8_t& acVar);
+		void Write(const uint16_t& acVar);
+		void Write(const uint8_t& acVar);
 
 	private:
 		std::string& m_DataStream;

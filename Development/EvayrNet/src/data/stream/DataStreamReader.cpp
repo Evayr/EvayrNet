@@ -42,6 +42,30 @@ void DataStreamReader::Read(double& aVar)
 	m_ReadPosition += sizeof(double);
 }
 
+void EvayrNet::DataStreamReader::Read(int16_t& aVar)
+{
+	memcpy(((uint8_t*)&aVar), &m_DataStream[m_ReadPosition], sizeof(int16_t));
+	m_ReadPosition += sizeof(int16_t);
+}
+
+void EvayrNet::DataStreamReader::Read(int8_t& aVar)
+{
+	memcpy(((uint8_t*)&aVar), &m_DataStream[m_ReadPosition], sizeof(int8_t));
+	m_ReadPosition += sizeof(int8_t);
+}
+
+void EvayrNet::DataStreamReader::Read(uint16_t& aVar)
+{
+	memcpy(((uint8_t*)&aVar), &m_DataStream[m_ReadPosition], sizeof(uint16_t));
+	m_ReadPosition += sizeof(uint16_t);
+}
+
+void EvayrNet::DataStreamReader::Read(uint8_t& aVar)
+{
+	memcpy(((uint8_t*)&aVar), &m_DataStream[m_ReadPosition], sizeof(uint8_t));
+	m_ReadPosition += sizeof(uint8_t);
+}
+
 void DataStreamReader::SkipBytes(uint32_t aLength)
 {
 	m_ReadPosition += aLength;

@@ -354,7 +354,7 @@ bool EvayrNet::Connection::SequenceIsNewer(uint8_t aID) const
 
 void Connection::UpdateLifetime()
 {
-	if (!m_Active) return;
+	if (!m_Active && !g_Network->IsConnected()) return;
 
 	if (uint32_t(clock() - m_PingClock) > m_ConnectionTimeout)
 	{

@@ -58,7 +58,7 @@ void UDPSocket::Disconnect()
 {
 	if (m_Connected)
 	{
-		printf("Saying goodbye to everyone\n");
+		//printf("Saying goodbye to everyone\n");
 		// Send disconnect message to everyone
 		auto pDisconnectMessage = std::make_shared<Messages::Disconnect>();
 		pDisconnectMessage->connectionID = m_ConnectionID;
@@ -128,24 +128,31 @@ void UDPSocket::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 	}
 }
 
-uint16_t UDPSocket::ProcessIPAddress(const IPAddress& aIPAddress)
+uint16_t UDPSocket::ProcessIPAddress(const IPAddress& acIPAddress)
 {
-	// Checks if the connection is new. If so, create a new Connection
-	// Returns the ConnectionID of the connection
-	for (auto& connection : m_Connections)
+	if (g_Network->IsServer())
 	{
-		if (connection.GetIPAddress() == aIPAddress && connection.IsActive())
+		// Checks if the connection is new. If so, create a new Connection
+		// Returns the ConnectionID of the connection
+		for (auto& connection : m_Connections)
 		{
-			return connection.GetConnectionID();
+			if (connection.GetIPAddress() == acIPAddress && connection.IsActive())
+			{
+				return connection.GetConnectionID();
+			}
 		}
+
+		// No connection found - create new one
+		uint16_t connectionID = m_ConnectionIDGenerator.GenerateID();
+		printf("Adding %s:%u as a new connection with connection ID %u...\n", acIPAddress.m_Address.c_str(), acIPAddress.m_Port, connectionID);
+
+		m_Connections.push_back(Connection(acIPAddress, connectionID, g_Network->GetNetworkSystem()->IsServer()));
+		return connectionID;
 	}
-
-	// No connection found - create new one
-	uint16_t connectionID = m_ConnectionIDGenerator.GenerateID();
-	printf("Adding %s:%u as a new connection with connection ID %u...\n", aIPAddress.m_Address.c_str(), aIPAddress.m_Port, connectionID);
-
-	m_Connections.push_back(Connection(aIPAddress, connectionID, g_Network->GetNetworkSystem()->IsServer()));
-	return connectionID;
+	else
+	{
+		return kServerConnectionID;
+	}
 }
 
 void UDPSocket::ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK)
@@ -175,7 +182,14 @@ void UDPSocket::SetConnected(bool aVal)
 
 bool UDPSocket::IsConnected() const
 {
-	return m_Connected;
+	if (g_Network->IsServer())
+	{
+		return true;
+	}
+	else
+	{
+		return m_Connected;
+	}
 }
 
 void UDPSocket::AddConnection(const IPAddress& aIPAddress, bool aSendHeartbeats)

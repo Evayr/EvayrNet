@@ -42,7 +42,7 @@ namespace EvayrNet
 		void SetConnected(bool aVal);
 		bool IsConnected() const;
 
-		void AddConnection(const IPAddress& aIPAddress, bool aSendHeartbeats = false);
+		void AddConnection(const IPAddress& acIPAddress, bool aSendHeartbeats = false);
 		Connection* GetNewestConnection();
 		Connection* GetConnection(uint16_t aID);
 		uint8_t GetActiveConnectionsCount() const;

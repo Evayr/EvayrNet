@@ -41,12 +41,17 @@ namespace EvayrNet
 		void RegisterOnPlayerDisconnectCallback(std::function<void(uint16_t, EvayrNet::Messages::EDisconnectReason)> aCallback);
 
 		bool IsConnected() const;
+		const bool IsServer() const;
 
 		NetworkSystem* GetNetworkSystem();
 		UDPSocket* GetUDPSocket();
 
+		const uint32_t GetPing(uint16_t aConnectionID = UDPSocket::kServerConnectionID) const;
+
 	private:
 		void CreateSocket(uint16_t aPort);
+
+		bool m_isServer;
 
 		PacketHandler m_PacketHandler;
 		std::unique_ptr<UDPSocket> m_pUDPSocket;

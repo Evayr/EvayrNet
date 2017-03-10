@@ -35,8 +35,20 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 	Messages::MessageHeader header;
 	Messages::ACK ack;
 
-	uint16_t packetSize = aPacket.GetDataSize();
+	const uint16_t packetSize = aPacket.GetDataSize();
 	uint16_t bytesRead = 0;
+
+	// Error-checking / logging
+	struct DeserializedMessage
+	{
+		DeserializedMessage(const std::string& acName, uint16_t aSize)
+			: name(acName)
+			, size(aSize)
+		{}
+		std::string name;
+		uint16_t size;
+	};
+	std::list<DeserializedMessage> messagesRead;
 
 	while(bytesRead < packetSize)
 	{
@@ -48,8 +60,28 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 		reader.Read(header.connectionID);
 
 		// Deserialize message
+		//printf("Received a message from connectionID %u\n", header.connectionID);
 		std::shared_ptr<Messages::Message> pMessage = m_Messages[header.opcode]->CreateInstance();
-		pMessage->Deserialize(reader);
+		pMessage->m_ConnectionID = header.connectionID;
+
+		if (pMessage->GetMessageSize() + bytesRead <= packetSize)
+		{
+			messagesRead.push_back(DeserializedMessage(pMessage->GetMessageName(), pMessage->GetMessageSize()));
+			pMessage->Deserialize(reader);
+		}
+		else
+		{
+			printf("ERROR! Not enough bytes to deserialize message (%u bytes). Messages read were:\n", packetSize);
+			uint8_t id = 0;
+			uint16_t totalBytes = 0;
+			for (auto it : messagesRead)
+			{
+				totalBytes += it.size;
+				printf("ID %u: \"%s\" (%u bytes, %u/%u)", id, it.name.c_str(), it.size, totalBytes, packetSize);
+				id++;
+			}
+			break;
+		}
 
 		// Process SequenceID if it has one
 		if (header.sequenceID == 0 || header.opcode == ack.GetMessageOpcode())

@@ -48,11 +48,11 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage,
 
 	// Add ACK is necessary - This can only happen for new messages.
 	// Messages that are re-sent will keep their ACK and Sequence ID.
-	if (apMessage->m_MessageType != Messages::EMessageType::MESSAGE_UNRELIABLE && aStoreACK)
+	if (apMessage->m_MessageType != Messages::EMessageType::MESSAGETYPE_UNRELIABLE && aStoreACK)
 	{
 		// Add Sequence ID if necessary
 		// Apply this first so that the cached ACK message has the correct SequenceID attached to it in case it has to re-send the message
-		if (apMessage->m_MessageType == Messages::EMessageType::MESSAGE_SEQUENCED)
+		if (apMessage->m_MessageType == Messages::EMessageType::MESSAGETYPE_SEQUENCED)
 		{
 			// Apply SequenceID to message
 			apMessage->m_SequenceID = m_NewestSendSequenceID;
@@ -76,7 +76,7 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage,
 		auto pACK = std::make_shared<Messages::ACK>();
 		pACK->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
 		pACK->id = m_NewestSendACKID;
-		pACK->m_MessageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
+		pACK->m_MessageType = Messages::EMessageType::MESSAGETYPE_UNRELIABLE;
 
 		AddMessage(pACK, false, apMessage->GetMessageSize()); // Make sure the ACK fits in the same packet as the relevant message
 		AddCachedACKMessage(apMessage, m_NewestSendACKID);
@@ -354,13 +354,21 @@ bool EvayrNet::Connection::SequenceIsNewer(uint8_t aID) const
 
 void Connection::UpdateLifetime()
 {
-	if (!m_Active && !g_Network->IsConnected()) return;
+	if (!g_Network->IsConnected()) return;
+	if (!m_Active) return;
+	if (GetConnectionID() == 0) return;
 
 	if (uint32_t(clock() - m_PingClock) > m_ConnectionTimeout)
 	{
 		printf("Connection with ID %i has timed out.\n", m_ConnectionID);
 		m_Packets.clear();
 		m_Active = false;
+
+		// Connection lost with the server
+		if (m_ConnectionID == UDPSocket::kServerConnectionID)
+		{
+			g_Network->Disconnect();
+		}
 	}
 
 	if (m_SendHeartbeats)
@@ -383,7 +391,7 @@ void Connection::ResendMessages()
 			message.m_TimeSent = now;
 
 			// Re-send it over the network
-			if (message.m_pMessage->m_MessageType == Messages::EMessageType::MESSAGE_RELIABLE)
+			if (message.m_pMessage->m_MessageType == Messages::EMessageType::MESSAGETYPE_RELIABLE)
 			{
 				g_Network->SendReliable(message.m_pMessage, m_ConnectionID, false);
 			}

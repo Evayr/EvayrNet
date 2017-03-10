@@ -8,6 +8,7 @@ using namespace EvayrNet;
 EvayrNet::NetworkManager* EvayrNet::g_Network = nullptr;
 
 NetworkManager::NetworkManager(uint16_t aPort, bool aIsServer)
+	: m_isServer(aIsServer)
 {
 	g_Network = this;
 
@@ -59,19 +60,19 @@ void NetworkManager::Disconnect()
 
 void NetworkManager::Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
-	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_UNRELIABLE;
 	m_pUDPSocket->AddMessage(apMessage, aConnectionID, false);
 }
 
 void NetworkManager::SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
-	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_RELIABLE;
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_RELIABLE;
 	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
 void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
-	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_SEQUENCED;
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_SEQUENCED;
 	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
@@ -110,6 +111,11 @@ bool NetworkManager::IsConnected() const
 	return m_pUDPSocket->IsConnected();
 }
 
+const bool EvayrNet::NetworkManager::IsServer() const
+{
+	return m_isServer;
+}
+
 NetworkSystem* EvayrNet::NetworkManager::GetNetworkSystem()
 {
 	return m_pNetworkSystem.get();
@@ -118,4 +124,19 @@ NetworkSystem* EvayrNet::NetworkManager::GetNetworkSystem()
 UDPSocket* NetworkManager::GetUDPSocket()
 {
 	return m_pUDPSocket.get();
+}
+
+const uint32_t EvayrNet::NetworkManager::GetPing(uint16_t aConnectionID) const
+{
+	if (m_pUDPSocket->IsConnected() == false) return 0;
+	Connection* pConnection = m_pUDPSocket->GetConnection(aConnectionID);
+
+	if (pConnection)
+	{
+		return pConnection->GetPing();
+	}
+	else
+	{
+		return 0;
+	}
 }

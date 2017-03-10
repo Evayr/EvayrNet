@@ -19,7 +19,7 @@ namespace EvayrNet
 		enum
 		{
 			kDefaultHeartbeatInterval = 250, // ms
-			kDefaultConnectionTimout = 5000, // ms
+			kDefaultConnectionTimout = 15000, // ms
 			kResendDelay = 5, // ms - rough estimation for the processing delay / ping differential
 		};
 

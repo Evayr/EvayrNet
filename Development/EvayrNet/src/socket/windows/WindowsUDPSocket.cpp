@@ -72,9 +72,14 @@ void WindowsUDPSocket::Send()
 		// Serialize, encrypt and then send
 		for (auto j = 0; j < connection.GetPacketCount(); ++j)
 		{
+			// Prepare packet
 			connection.GetPacket(j)->Serialize();
 			connection.GetPacket(j)->Encrypt();
 
+			// Logging
+			m_DataPerSecondSent.push_back(DataDebugInfo(connection.GetPacket(j)->GetMessagesSize(), clock()));
+
+			// Send data
 			int32_t result = sendto(m_Socket, connection.GetPacket(j)->GetData(), connection.GetPacket(j)->GetMessagesSize(), 0, reinterpret_cast<SOCKADDR*>(&address), sizeof(address));
 			if (result < 0)
 			{
@@ -106,6 +111,9 @@ void WindowsUDPSocket::Receive()
 	else if (messageSize > 0)
 	{
 		//printf("Received %u bytes of data...\n", messageSize);
+
+		// Log data
+		m_DataPerSecondReceived.push_back(DataDebugInfo(messageSize, clock()));
 
 		// Process IP Address
 		IPAddress ip;

@@ -36,9 +36,27 @@ int main()
 
 	net.SetTickRate(144);
 
+	uint32_t dataLogInterval = 1000; // ms
+	clock_t m_dataClock = clock();
+
 	for (;;)
 	{
 		net.Update();
+
+		if (clock() - m_dataClock >= dataLogInterval)
+		{
+			m_dataClock = clock();
+
+			if (net.IsServer() && net.GetActiveConnectionsCount() > 0)
+			{
+				printf("Data log: | Active connections: %u | Packet Per Second in: %u | PPS out: %u | PPS lost: %u | Bytes per second in: %u | Bytes per second out: %u |\n"
+				, net.GetActiveConnectionsCount(), net.GetIncomingPacketsPerSecond(), net.GetOutgoingPacketsPerSecond(), net.GetPacketsPerSecondLost(), net.GetIncomingDataPerSecond(), net.GetOutgoingDataPerSecond());
+				//for (uint16_t i = 0; i < net.GetActiveConnectionsCount(); ++i)
+				//{
+				//	printf("| Connection ID %u ping: %u |\n", net.GetPing());
+				//}
+			}
+		}
 	}
 
 	return 0;

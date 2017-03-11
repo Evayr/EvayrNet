@@ -140,3 +140,33 @@ const uint32_t EvayrNet::NetworkManager::GetPing(uint16_t aConnectionID) const
 		return 0;
 	}
 }
+
+const uint32_t NetworkManager::GetIncomingPacketsPerSecond() const
+{
+	return m_pUDPSocket->GetIncomingPacketsPerSecond();
+}
+
+const uint32_t NetworkManager::GetOutgoingPacketsPerSecond() const
+{
+	return m_pUDPSocket->GetOutgoingPacketsPerSecond();
+}
+
+const uint32_t NetworkManager::GetPacketsPerSecondLost() const
+{
+	return m_pUDPSocket->GetPacketsPerSecondLost();
+}
+
+const uint32_t NetworkManager::GetIncomingDataPerSecond() const
+{
+	return m_pUDPSocket->GetIncomingDataPerSecond();
+}
+
+const uint32_t NetworkManager::GetOutgoingDataPerSecond() const
+{
+	return m_pUDPSocket->GetOutgoingDataPerSecond();
+}
+
+const uint16_t NetworkManager::GetActiveConnectionsCount() const
+{
+	return m_pUDPSocket->GetActiveConnectionsCount();
+}

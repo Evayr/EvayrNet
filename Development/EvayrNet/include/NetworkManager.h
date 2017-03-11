@@ -47,6 +47,12 @@ namespace EvayrNet
 		UDPSocket* GetUDPSocket();
 
 		const uint32_t GetPing(uint16_t aConnectionID = UDPSocket::kServerConnectionID) const;
+		const uint32_t GetIncomingPacketsPerSecond() const;
+		const uint32_t GetOutgoingPacketsPerSecond() const;
+		const uint32_t GetPacketsPerSecondLost() const;
+		const uint32_t GetIncomingDataPerSecond() const;
+		const uint32_t GetOutgoingDataPerSecond() const;
+		const uint16_t GetActiveConnectionsCount() const;
 
 	private:
 		void CreateSocket(uint16_t aPort);

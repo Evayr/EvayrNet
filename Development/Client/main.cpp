@@ -38,11 +38,25 @@ int main()
 	net.SetTickRate(144);
 
 	clock_t startClock = clock();
-	float timeoutTime = 5000;
+	float timeoutTime = 10000;
+
+	uint32_t dataLogInterval = 1000; // ms
+	clock_t m_dataClock = clock();
 
 	while(clock() - startClock < timeoutTime)
 	{
 		net.Update();
+
+		if (clock() - m_dataClock >= dataLogInterval)
+		{
+			m_dataClock = clock();
+
+			if (net.IsConnected())
+			{
+				printf("Data log: | Latest ping: %u | Average ping: %u | Packet Per Second in: %u | PPS out: %u | PPS lost: %u | Bytes per second in: %u | Bytes per second out: %u |\n"
+					, net.GetNewestPing(), net.GetAveragePing(), net.GetIncomingPacketsPerSecond(), net.GetOutgoingPacketsPerSecond(), net.GetPacketsPerSecondLost(), net.GetIncomingDataPerSecond(), net.GetOutgoingDataPerSecond());
+			}
+		}
 	}
 
 	net.Disconnect();

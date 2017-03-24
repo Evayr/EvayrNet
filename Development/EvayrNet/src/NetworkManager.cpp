@@ -126,14 +126,29 @@ UDPSocket* NetworkManager::GetUDPSocket()
 	return m_pUDPSocket.get();
 }
 
-const uint32_t EvayrNet::NetworkManager::GetPing(uint16_t aConnectionID) const
+const uint32_t EvayrNet::NetworkManager::GetNewestPing(uint16_t aConnectionID) const
 {
 	if (m_pUDPSocket->IsConnected() == false) return 0;
 	Connection* pConnection = m_pUDPSocket->GetConnection(aConnectionID);
 
 	if (pConnection)
 	{
-		return pConnection->GetPing();
+		return pConnection->GetNewestPing();
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+const uint32_t EvayrNet::NetworkManager::GetAveragePing(uint16_t aConnectionID) const
+{
+	if (m_pUDPSocket->IsConnected() == false) return 0;
+	Connection* pConnection = m_pUDPSocket->GetConnection(aConnectionID);
+
+	if (pConnection)
+	{
+		return pConnection->GetAveragePing();
 	}
 	else
 	{

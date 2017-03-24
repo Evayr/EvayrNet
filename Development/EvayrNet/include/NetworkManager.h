@@ -46,7 +46,8 @@ namespace EvayrNet
 		NetworkSystem* GetNetworkSystem();
 		UDPSocket* GetUDPSocket();
 
-		const uint32_t GetPing(uint16_t aConnectionID = UDPSocket::kServerConnectionID) const;
+		const uint32_t GetNewestPing(uint16_t aConnectionID = UDPSocket::kServerConnectionID) const;
+		const uint32_t GetAveragePing(uint16_t aConnectionID = UDPSocket::kServerConnectionID) const;
 		const uint32_t GetIncomingPacketsPerSecond() const;
 		const uint32_t GetOutgoingPacketsPerSecond() const;
 		const uint32_t GetPacketsPerSecondLost() const;

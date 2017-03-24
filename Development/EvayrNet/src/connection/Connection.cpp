@@ -16,7 +16,7 @@ Connection::Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, boo
 	, m_HeartbeatClock(clock())
 	, m_HeartbeatID(0)
 	, m_PingClock(clock())
-	, m_Ping(0)
+	, m_TempPingsRecorded(0)
 	, m_SendHeartbeats(aSendHeartbeats)
 {
 }
@@ -237,12 +237,12 @@ void Connection::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 		// Update ping
 		if (g_Network->GetNetworkSystem()->IsServer())
 		{
-			m_Ping = uint32_t(clock() - m_PingClock);	
+			PushPing(uint32_t(clock() - m_PingClock));
 		}
 		else
 		{
 			m_PingClock = clock();
-			m_Ping = acMessage.ping;
+			PushPing(acMessage.ping);
 		}
 
 		//printf("Heartbeat with ID %i received. Our ping is %u\n", acMessage.id, m_Ping);
@@ -255,9 +255,38 @@ void Connection::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 	}
 }
 
-uint32_t EvayrNet::Connection::GetPing() const
+void EvayrNet::Connection::PushPing(uint32_t aPing)
 {
-	return m_Ping;
+	for (uint8_t i = kPingStorageCount - 1; i > 0; --i)
+	{
+		m_RecentPings[i] = m_RecentPings[i - 1];
+	}
+	m_RecentPings[0] = aPing;
+
+	if (m_TempPingsRecorded < kPingStorageCount)
+	{
+		m_TempPingsRecorded++;
+	}
+}
+
+const uint32_t EvayrNet::Connection::GetNewestPing() const
+{
+	return m_RecentPings[0];
+}
+
+const uint32_t EvayrNet::Connection::GetAveragePing() const
+{
+	if (m_TempPingsRecorded == 0) return 0;
+
+	uint32_t avg = 0;
+
+	for (uint8_t i = 0; i < m_TempPingsRecorded; ++i)
+	{
+		avg += m_RecentPings[i];
+	}
+	avg /= m_TempPingsRecorded;
+
+	return avg;
 }
 
 void Connection::EnableAutoHeartbeat()
@@ -383,7 +412,7 @@ void Connection::ResendMessages()
 
 	for (auto message : m_CachedACKMessages)
 	{
-		if (uint32_t(now - message.m_TimeSent) >= m_Ping + kResendDelay)
+		if (uint32_t(now - message.m_TimeSent) >= GetAveragePing() + kResendDelay)
 		{
 			//printf("Resending message \"%s\". SequenceID: %u\n", message.m_pMessage->GetMessageName(), message.m_pMessage->m_SequenceID);
 
@@ -417,7 +446,7 @@ void Connection::SendHeartbeat(bool aForceSend)
 	auto pHeartbeat = std::make_shared<Messages::Heartbeat>();
 	pHeartbeat->id = m_HeartbeatID;
 	pHeartbeat->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
-	pHeartbeat->ping = m_Ping;
+	pHeartbeat->ping = GetAveragePing();
 
 	// Reset ping timer
 	if (g_Network->GetNetworkSystem()->IsServer())

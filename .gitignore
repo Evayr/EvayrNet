@@ -75,3 +75,5 @@ Temporary Items
 Development/codegen log.txt
 Development/EvayrNet/bin/x64/Debug/EvayrNet.lib
 *.exe
+*.iobj
+*.ipdb

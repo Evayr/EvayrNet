@@ -43,11 +43,11 @@ int main()
 	{
 		net.Update();
 
-		if (clock() - m_dataClock >= dataLogInterval)
+		if (uint32_t(clock() - m_dataClock) >= dataLogInterval)
 		{
 			m_dataClock = clock();
 
-			if (net.IsServer() && net.GetActiveConnectionsCount() > 0)
+			if (net.IsServer() && net.GetActiveConnectionsCount() > 0U)
 			{
 				printf("Data log: | Active connections: %u | Packet Per Second in: %u | PPS out: %u | PPS lost: %u | Bytes per second in: %u | Bytes per second out: %u |\n"
 				, net.GetActiveConnectionsCount(), net.GetIncomingPacketsPerSecond(), net.GetOutgoingPacketsPerSecond(), net.GetPacketsPerSecondLost(), net.GetIncomingDataPerSecond(), net.GetOutgoingDataPerSecond());

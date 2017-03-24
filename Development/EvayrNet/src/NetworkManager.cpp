@@ -106,7 +106,7 @@ void NetworkManager::RegisterOnPlayerDisconnectCallback(std::function<void(uint1
 	m_pNetworkSystem->RegisterOnPlayerDisconnectCallback(aCallback);
 }
 
-bool NetworkManager::IsConnected() const
+const bool NetworkManager::IsConnected() const
 {
 	return m_pUDPSocket->IsConnected();
 }

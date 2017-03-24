@@ -40,7 +40,7 @@ namespace EvayrNet
 		void RegisterOnPlayerAddCallback(std::function<void(uint16_t)> aCallback);
 		void RegisterOnPlayerDisconnectCallback(std::function<void(uint16_t, EvayrNet::Messages::EDisconnectReason)> aCallback);
 
-		bool IsConnected() const;
+		const bool IsConnected() const;
 		const bool IsServer() const;
 
 		NetworkSystem* GetNetworkSystem();

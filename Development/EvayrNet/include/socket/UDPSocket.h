@@ -40,7 +40,7 @@ namespace EvayrNet
 		void ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK);
 
 		void SetConnected(bool aVal);
-		bool IsConnected() const;
+		const bool IsConnected() const;
 
 		void AddConnection(const IPAddress& acIPAddress, bool aSendHeartbeats = false);
 		Connection* GetNewestConnection();

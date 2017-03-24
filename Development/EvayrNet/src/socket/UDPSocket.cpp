@@ -180,7 +180,7 @@ void UDPSocket::SetConnected(bool aVal)
 	}
 }
 
-bool UDPSocket::IsConnected() const
+const bool UDPSocket::IsConnected() const
 {
 	if (g_Network->IsServer())
 	{

@@ -19,8 +19,9 @@ namespace EvayrNet
 		enum
 		{
 			kDefaultHeartbeatInterval = 250, // ms
-			kDefaultConnectionTimout = 5000, // ms
+			kDefaultConnectionTimout = 15000, // ms
 			kResendDelay = 5, // ms - rough estimation for the processing delay / ping differential
+			kPingStorageCount = 8,
 		};
 
 		struct CachedACKMessage
@@ -65,7 +66,9 @@ namespace EvayrNet
 		void ProcessACK(const Messages::ACK& acACK);
 		void ProcessHeartbeat(const Messages::Heartbeat& acMessage);
 
-		uint32_t GetPing() const;
+		void PushPing(uint32_t aPing);
+		const uint32_t GetNewestPing() const;
+		const uint32_t GetAveragePing() const;
 
 		void EnableAutoHeartbeat();
 		void DisableAutoHeartbeat();
@@ -106,7 +109,8 @@ namespace EvayrNet
 
 		// Ping
 		clock_t m_PingClock;
-		uint32_t m_Ping;
+		uint32_t m_RecentPings[kPingStorageCount];
+		uint8_t m_TempPingsRecorded;
 	};
 }
 

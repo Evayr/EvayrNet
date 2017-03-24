@@ -7,9 +7,9 @@ namespace EvayrNet
 	{
 		enum EMessageType
 		{
-			MESSAGE_UNRELIABLE = 0,
-			MESSAGE_RELIABLE = 1,
-			MESSAGE_SEQUENCED = 2,
+			MESSAGETYPE_UNRELIABLE = 0,
+			MESSAGETYPE_RELIABLE = 1,
+			MESSAGETYPE_SEQUENCED = 2,
 		};
 
 		enum EDisconnectReason

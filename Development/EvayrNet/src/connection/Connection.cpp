@@ -16,7 +16,7 @@ Connection::Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, boo
 	, m_HeartbeatClock(clock())
 	, m_HeartbeatID(0)
 	, m_PingClock(clock())
-	, m_Ping(0)
+	, m_TempPingsRecorded(0)
 	, m_SendHeartbeats(aSendHeartbeats)
 {
 }
@@ -48,11 +48,11 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage,
 
 	// Add ACK is necessary - This can only happen for new messages.
 	// Messages that are re-sent will keep their ACK and Sequence ID.
-	if (apMessage->m_MessageType != Messages::EMessageType::MESSAGE_UNRELIABLE && aStoreACK)
+	if (apMessage->m_MessageType != Messages::EMessageType::MESSAGETYPE_UNRELIABLE && aStoreACK)
 	{
 		// Add Sequence ID if necessary
 		// Apply this first so that the cached ACK message has the correct SequenceID attached to it in case it has to re-send the message
-		if (apMessage->m_MessageType == Messages::EMessageType::MESSAGE_SEQUENCED)
+		if (apMessage->m_MessageType == Messages::EMessageType::MESSAGETYPE_SEQUENCED)
 		{
 			// Apply SequenceID to message
 			apMessage->m_SequenceID = m_NewestSendSequenceID;
@@ -76,7 +76,7 @@ void Connection::AddMessage(const std::shared_ptr<Messages::Message>& apMessage,
 		auto pACK = std::make_shared<Messages::ACK>();
 		pACK->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
 		pACK->id = m_NewestSendACKID;
-		pACK->m_MessageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
+		pACK->m_MessageType = Messages::EMessageType::MESSAGETYPE_UNRELIABLE;
 
 		AddMessage(pACK, false, apMessage->GetMessageSize()); // Make sure the ACK fits in the same packet as the relevant message
 		AddCachedACKMessage(apMessage, m_NewestSendACKID);
@@ -237,12 +237,12 @@ void Connection::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 		// Update ping
 		if (g_Network->GetNetworkSystem()->IsServer())
 		{
-			m_Ping = uint32_t(clock() - m_PingClock);	
+			PushPing(uint32_t(clock() - m_PingClock));
 		}
 		else
 		{
 			m_PingClock = clock();
-			m_Ping = acMessage.ping;
+			PushPing(acMessage.ping);
 		}
 
 		//printf("Heartbeat with ID %i received. Our ping is %u\n", acMessage.id, m_Ping);
@@ -255,9 +255,38 @@ void Connection::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 	}
 }
 
-uint32_t EvayrNet::Connection::GetPing() const
+void EvayrNet::Connection::PushPing(uint32_t aPing)
 {
-	return m_Ping;
+	for (uint8_t i = kPingStorageCount - 1; i > 0; --i)
+	{
+		m_RecentPings[i] = m_RecentPings[i - 1];
+	}
+	m_RecentPings[0] = aPing;
+
+	if (m_TempPingsRecorded < kPingStorageCount)
+	{
+		m_TempPingsRecorded++;
+	}
+}
+
+const uint32_t EvayrNet::Connection::GetNewestPing() const
+{
+	return m_RecentPings[0];
+}
+
+const uint32_t EvayrNet::Connection::GetAveragePing() const
+{
+	if (m_TempPingsRecorded == 0) return 0;
+
+	uint32_t avg = 0;
+
+	for (uint8_t i = 0; i < m_TempPingsRecorded; ++i)
+	{
+		avg += m_RecentPings[i];
+	}
+	avg /= m_TempPingsRecorded;
+
+	return avg;
 }
 
 void Connection::EnableAutoHeartbeat()
@@ -354,13 +383,21 @@ bool EvayrNet::Connection::SequenceIsNewer(uint8_t aID) const
 
 void Connection::UpdateLifetime()
 {
-	if (!m_Active && !g_Network->IsConnected()) return;
+	if (!g_Network->IsConnected()) return;
+	if (!m_Active) return;
+	if (GetConnectionID() == 0) return;
 
 	if (uint32_t(clock() - m_PingClock) > m_ConnectionTimeout)
 	{
 		printf("Connection with ID %i has timed out.\n", m_ConnectionID);
 		m_Packets.clear();
 		m_Active = false;
+
+		// Connection lost with the server
+		if (m_ConnectionID == UDPSocket::kServerConnectionID)
+		{
+			g_Network->Disconnect();
+		}
 	}
 
 	if (m_SendHeartbeats)
@@ -375,7 +412,7 @@ void Connection::ResendMessages()
 
 	for (auto message : m_CachedACKMessages)
 	{
-		if (uint32_t(now - message.m_TimeSent) >= m_Ping + kResendDelay)
+		if (uint32_t(now - message.m_TimeSent) >= GetAveragePing() + kResendDelay)
 		{
 			//printf("Resending message \"%s\". SequenceID: %u\n", message.m_pMessage->GetMessageName(), message.m_pMessage->m_SequenceID);
 
@@ -383,7 +420,7 @@ void Connection::ResendMessages()
 			message.m_TimeSent = now;
 
 			// Re-send it over the network
-			if (message.m_pMessage->m_MessageType == Messages::EMessageType::MESSAGE_RELIABLE)
+			if (message.m_pMessage->m_MessageType == Messages::EMessageType::MESSAGETYPE_RELIABLE)
 			{
 				g_Network->SendReliable(message.m_pMessage, m_ConnectionID, false);
 			}
@@ -409,7 +446,7 @@ void Connection::SendHeartbeat(bool aForceSend)
 	auto pHeartbeat = std::make_shared<Messages::Heartbeat>();
 	pHeartbeat->id = m_HeartbeatID;
 	pHeartbeat->connectionID = g_Network->GetUDPSocket()->GetConnectionID();
-	pHeartbeat->ping = m_Ping;
+	pHeartbeat->ping = GetAveragePing();
 
 	// Reset ping timer
 	if (g_Network->GetNetworkSystem()->IsServer())

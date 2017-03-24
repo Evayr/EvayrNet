@@ -8,6 +8,7 @@ using namespace EvayrNet;
 EvayrNet::NetworkManager* EvayrNet::g_Network = nullptr;
 
 NetworkManager::NetworkManager(uint16_t aPort, bool aIsServer)
+	: m_isServer(aIsServer)
 {
 	g_Network = this;
 
@@ -59,19 +60,19 @@ void NetworkManager::Disconnect()
 
 void NetworkManager::Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
-	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_UNRELIABLE;
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_UNRELIABLE;
 	m_pUDPSocket->AddMessage(apMessage, aConnectionID, false);
 }
 
 void NetworkManager::SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
-	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_RELIABLE;
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_RELIABLE;
 	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
 void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
-	apMessage->m_MessageType = Messages::EMessageType::MESSAGE_SEQUENCED;
+	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_SEQUENCED;
 	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
 }
 
@@ -105,9 +106,14 @@ void NetworkManager::RegisterOnPlayerDisconnectCallback(std::function<void(uint1
 	m_pNetworkSystem->RegisterOnPlayerDisconnectCallback(aCallback);
 }
 
-bool NetworkManager::IsConnected() const
+const bool NetworkManager::IsConnected() const
 {
 	return m_pUDPSocket->IsConnected();
+}
+
+const bool EvayrNet::NetworkManager::IsServer() const
+{
+	return m_isServer;
 }
 
 NetworkSystem* EvayrNet::NetworkManager::GetNetworkSystem()
@@ -118,4 +124,64 @@ NetworkSystem* EvayrNet::NetworkManager::GetNetworkSystem()
 UDPSocket* NetworkManager::GetUDPSocket()
 {
 	return m_pUDPSocket.get();
+}
+
+const uint32_t EvayrNet::NetworkManager::GetNewestPing(uint16_t aConnectionID) const
+{
+	if (m_pUDPSocket->IsConnected() == false) return 0;
+	Connection* pConnection = m_pUDPSocket->GetConnection(aConnectionID);
+
+	if (pConnection)
+	{
+		return pConnection->GetNewestPing();
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+const uint32_t EvayrNet::NetworkManager::GetAveragePing(uint16_t aConnectionID) const
+{
+	if (m_pUDPSocket->IsConnected() == false) return 0;
+	Connection* pConnection = m_pUDPSocket->GetConnection(aConnectionID);
+
+	if (pConnection)
+	{
+		return pConnection->GetAveragePing();
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+const uint32_t NetworkManager::GetIncomingPacketsPerSecond() const
+{
+	return m_pUDPSocket->GetIncomingPacketsPerSecond();
+}
+
+const uint32_t NetworkManager::GetOutgoingPacketsPerSecond() const
+{
+	return m_pUDPSocket->GetOutgoingPacketsPerSecond();
+}
+
+const uint32_t NetworkManager::GetPacketsPerSecondLost() const
+{
+	return m_pUDPSocket->GetPacketsPerSecondLost();
+}
+
+const uint32_t NetworkManager::GetIncomingDataPerSecond() const
+{
+	return m_pUDPSocket->GetIncomingDataPerSecond();
+}
+
+const uint32_t NetworkManager::GetOutgoingDataPerSecond() const
+{
+	return m_pUDPSocket->GetOutgoingDataPerSecond();
+}
+
+const uint16_t NetworkManager::GetActiveConnectionsCount() const
+{
+	return m_pUDPSocket->GetActiveConnectionsCount();
 }

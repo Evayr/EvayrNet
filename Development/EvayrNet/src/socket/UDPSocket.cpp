@@ -58,7 +58,7 @@ void UDPSocket::Disconnect()
 {
 	if (m_Connected)
 	{
-		printf("Saying goodbye to everyone\n");
+		//printf("Saying goodbye to everyone\n");
 		// Send disconnect message to everyone
 		auto pDisconnectMessage = std::make_shared<Messages::Disconnect>();
 		pDisconnectMessage->connectionID = m_ConnectionID;
@@ -128,24 +128,31 @@ void UDPSocket::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 	}
 }
 
-uint16_t UDPSocket::ProcessIPAddress(const IPAddress& aIPAddress)
+uint16_t UDPSocket::ProcessIPAddress(const IPAddress& acIPAddress)
 {
-	// Checks if the connection is new. If so, create a new Connection
-	// Returns the ConnectionID of the connection
-	for (auto& connection : m_Connections)
+	if (g_Network->IsServer())
 	{
-		if (connection.GetIPAddress() == aIPAddress && connection.IsActive())
+		// Checks if the connection is new. If so, create a new Connection
+		// Returns the ConnectionID of the connection
+		for (auto& connection : m_Connections)
 		{
-			return connection.GetConnectionID();
+			if (connection.GetIPAddress() == acIPAddress && connection.IsActive())
+			{
+				return connection.GetConnectionID();
+			}
 		}
+
+		// No connection found - create new one
+		uint16_t connectionID = m_ConnectionIDGenerator.GenerateID();
+		printf("Adding %s:%u as a new connection with connection ID %u...\n", acIPAddress.m_Address.c_str(), acIPAddress.m_Port, connectionID);
+
+		m_Connections.push_back(Connection(acIPAddress, connectionID, g_Network->GetNetworkSystem()->IsServer()));
+		return connectionID;
 	}
-
-	// No connection found - create new one
-	uint16_t connectionID = m_ConnectionIDGenerator.GenerateID();
-	printf("Adding %s:%u as a new connection with connection ID %u...\n", aIPAddress.m_Address.c_str(), aIPAddress.m_Port, connectionID);
-
-	m_Connections.push_back(Connection(aIPAddress, connectionID, g_Network->GetNetworkSystem()->IsServer()));
-	return connectionID;
+	else
+	{
+		return kServerConnectionID;
+	}
 }
 
 void UDPSocket::ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK)
@@ -173,9 +180,16 @@ void UDPSocket::SetConnected(bool aVal)
 	}
 }
 
-bool UDPSocket::IsConnected() const
+const bool UDPSocket::IsConnected() const
 {
-	return m_Connected;
+	if (g_Network->IsServer())
+	{
+		return true;
+	}
+	else
+	{
+		return m_Connected;
+	}
 }
 
 void UDPSocket::AddConnection(const IPAddress& aIPAddress, bool aSendHeartbeats)
@@ -210,7 +224,7 @@ Connection* UDPSocket::GetConnection(uint16_t aID)
 	return nullptr;
 }
 
-uint8_t UDPSocket::GetActiveConnectionsCount() const
+const uint8_t UDPSocket::GetActiveConnectionsCount() const
 {
 	uint8_t count = 0;
 
@@ -230,14 +244,57 @@ void UDPSocket::SetConnectionID(uint16_t aVal)
 	m_ConnectionID = aVal;
 }
 
-uint16_t UDPSocket::GetConnectionID() const
+const uint16_t UDPSocket::GetConnectionID() const
 {
 	return m_ConnectionID;
 }
 
-uint16_t EvayrNet::UDPSocket::GetPort() const
+const uint16_t UDPSocket::GetPort() const
 {
 	return m_Port;
+}
+
+const uint32_t UDPSocket::GetIncomingPacketsPerSecond() const
+{
+	return uint32_t(m_PPSIn.size());
+}
+
+const uint32_t UDPSocket::GetOutgoingPacketsPerSecond() const
+{
+	return uint32_t(m_PPSOut.size());
+}
+
+const uint32_t UDPSocket::GetPacketsPerSecondLost() const
+{
+	return uint32_t(m_PPSLost.size());
+}
+
+const uint32_t UDPSocket::GetIncomingDataPerSecond() const
+{
+	if (m_DataPerSecondReceived.size() == 0) return 0;
+
+	uint32_t dataSize = 0;
+
+	for (auto it : m_DataPerSecondReceived)
+	{
+		dataSize += it.dataSize;
+	}
+
+	return dataSize;
+}
+
+const uint32_t UDPSocket::GetOutgoingDataPerSecond() const
+{
+	if (m_DataPerSecondSent.size() == 0) return 0;
+
+	uint32_t dataSize = 0;
+
+	for (auto it : m_DataPerSecondSent)
+	{
+		dataSize += it.dataSize;
+	}
+
+	return dataSize;
 }
 
 void UDPSocket::Connect()
@@ -301,6 +358,9 @@ void UDPSocket::UpdateStatistics()
 	RemoveTimeIfExceedsAmount(&m_PPSOut);
 	RemoveTimeIfExceedsAmount(&m_PPSIn);
 	RemoveTimeIfExceedsAmount(&m_PPSLost);
+	RemoveTimeIfExceedsAmount(&m_DataPerSecondSent);
+	RemoveTimeIfExceedsAmount(&m_DataPerSecondReceived);
+
 	//printf("PPS OUT: %i | PPS IN: %i | PPS LOST: %i\n", m_PPSOut.size(), m_PPSIn.size(), m_PPSLost.size());
 }
 
@@ -316,6 +376,24 @@ void UDPSocket::RemoveTimeIfExceedsAmount(std::list<clock_t>* apList, float aTim
 		auto prev_it = it;
 		it++;
 		if (now - *prev_it >= aTime)
+		{
+			apList->erase(prev_it);
+		}
+	}
+}
+
+void UDPSocket::RemoveTimeIfExceedsAmount(std::list<DataDebugInfo>* apList, float aTime)
+{
+	if (apList->size() == 0) return;
+
+	const clock_t now = clock();
+
+	auto it = apList->begin();
+	while (it != apList->end())
+	{
+		auto prev_it = it;
+		it++;
+		if (now - (*prev_it).time >= aTime)
 		{
 			apList->erase(prev_it);
 		}

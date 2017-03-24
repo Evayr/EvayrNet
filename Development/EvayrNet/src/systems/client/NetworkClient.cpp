@@ -30,21 +30,6 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 			printf("Successfully connected to the server! Our Connection ID is: %i\n", acMessage.connectionID);
 			g_Network->GetUDPSocket()->SetConnected(true);
 			g_Network->GetUDPSocket()->SetConnectionID(acMessage.connectionID);
-
-			/* Test */
-			auto pText1 = std::make_shared<Messages::PrintText>();
-			pText1->text = "This is sequenced text number 1";
-
-			auto pText2 = std::make_shared<Messages::PrintText>();
-			pText2->text = "This is sequenced text number 2";
-
-			auto pText3 = std::make_shared<Messages::PrintText>();
-			pText3->text = "This is sequenced text number 3";
-
-			g_Network->SendSequenced(pText1);
-			g_Network->SendSequenced(pText2);
-			g_Network->SendSequenced(pText3);
-
 			break;
 		}
 

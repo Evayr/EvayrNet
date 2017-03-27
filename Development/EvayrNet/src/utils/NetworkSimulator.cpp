@@ -10,6 +10,7 @@ NetworkSimulator::NetworkSimulator()
 	, m_packetLoss(0)
 	, m_packetDuplication(0)
 {
+	srand(clock());
 }
 
 NetworkSimulator::~NetworkSimulator()
@@ -50,11 +51,14 @@ void NetworkSimulator::ProcessMessage(std::shared_ptr<Messages::Message> apMessa
 	message.storeACK = aStoreACK;
 	message.sendTime = int32_t(clock() + delay);
 	m_messagesToSend.push_back(message);
+
+	// Debug
+	//printf("Delaying a message called \"%s\" with %ums\n", apMessage->GetMessageName(), delay);
 }
 
 void NetworkSimulator::StartSimulation(const uint32_t acMinimumDelayMS, const uint32_t acRandomDelayMS, const float acPacketLossPct, const float acPacketDuplicationPct)
 {
-	printf("Started simulation with %u+~%ums, %0.3f%% packet flott and %0.3f%% packet duplication.\n", acMinimumDelayMS, acRandomDelayMS, acPacketLossPct, acPacketDuplicationPct);
+	printf("Started simulation with %u + ~%ums, %0.3f%% packet loss and %0.3f%% packet duplication.\n", acMinimumDelayMS, acRandomDelayMS, acPacketLossPct, acPacketDuplicationPct);
 	m_simulating = true;
 
 	m_minimumDelay = acMinimumDelayMS;
@@ -84,7 +88,7 @@ void NetworkSimulator::SendMessages(bool aForceSend)
 
 	for (auto it = m_messagesToSend.begin(); it != m_messagesToSend.end(); ++it)
 	{
-		if (int32_t(now - it->sendTime) <= 0 || aForceSend)
+		if (int32_t(it->sendTime - now) <= 0 || aForceSend)
 		{
 			g_Network->GetUDPSocket()->AddMessage(it->pMessage, it->connectionID, it->storeACK);
 			it = m_messagesToSend.erase(it);

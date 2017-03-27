@@ -37,7 +37,7 @@ int main()
 	net.ConnectTo("127.0.0.1", 7777);
 	net.SetTickRate(144);
 
-	net.StartSimulation(150, 25, 1.f, 1.f);
+	net.StartSimulation(150, 50, 1.f, 1.f);
 
 	clock_t startClock = clock();
 	float timeoutTime = 10000;

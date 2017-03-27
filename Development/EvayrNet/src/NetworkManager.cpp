@@ -45,6 +45,7 @@ void NetworkManager::CreateSocket(uint16_t aPort)
 
 void NetworkManager::Update()
 {
+	m_NetworkSimulator.Update();
 	m_pUDPSocket->Update();
 }
 
@@ -61,19 +62,43 @@ void NetworkManager::Disconnect()
 void NetworkManager::Send(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID)
 {
 	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_UNRELIABLE;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID, false);
+
+	if (m_NetworkSimulator.IsSimulating())
+	{
+		m_NetworkSimulator.ProcessMessage(apMessage, aConnectionID, false);
+	}
+	else
+	{
+		m_pUDPSocket->AddMessage(apMessage, aConnectionID, false);
+	}
 }
 
 void NetworkManager::SendReliable(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
 	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_RELIABLE;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
+
+	if (m_NetworkSimulator.IsSimulating())
+	{
+		m_NetworkSimulator.ProcessMessage(apMessage, aConnectionID, aStoreACK);
+	}
+	else
+	{
+		m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
+	}
 }
 
 void NetworkManager::SendSequenced(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
 	apMessage->m_MessageType = Messages::EMessageType::MESSAGETYPE_SEQUENCED;
-	m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
+	
+	if (m_NetworkSimulator.IsSimulating())
+	{
+		m_NetworkSimulator.ProcessMessage(apMessage, aConnectionID, aStoreACK);
+	}
+	else
+	{
+		m_pUDPSocket->AddMessage(apMessage, aConnectionID, aStoreACK);
+	}
 }
 
 void NetworkManager::RegisterMessage(std::unique_ptr<Messages::Message> apMessage, uint8_t aOpCode)
@@ -84,6 +109,16 @@ void NetworkManager::RegisterMessage(std::unique_ptr<Messages::Message> apMessag
 void NetworkManager::SetTickRate(uint8_t aSendTickRate)
 {
 	m_pUDPSocket->SetTickRate(aSendTickRate);
+}
+
+void NetworkManager::StartSimulation(const uint32_t acMinimumDelayMS, const uint32_t acRandomDelayMS, const float acPacketLossPct, const float acPacketDuplicationPct)
+{
+	m_NetworkSimulator.StartSimulation(acMinimumDelayMS, acRandomDelayMS, acPacketLossPct, acPacketDuplicationPct);
+}
+
+void NetworkManager::StopSimulation()
+{
+	m_NetworkSimulator.StopSimulation();
 }
 
 void NetworkManager::RegisterOnConnectionResultCallback(std::function<void(EvayrNet::Messages::EConnectionResult)> aCallback)

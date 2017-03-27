@@ -36,6 +36,8 @@ int main()
 
 	net.SetTickRate(144);
 
+	net.StartSimulation(50, 50, 0.f, 0.f);
+
 	uint32_t dataLogInterval = 1000; // ms
 	clock_t m_dataClock = clock();
 

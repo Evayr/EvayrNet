@@ -60,7 +60,7 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 		reader.Read(header.connectionID);
 
 		// Deserialize message
-		//printf("Received a message from connectionID %u\n", header.connectionID);
+		//g_Network->GetDebugger()->Print("Received a message from connectionID %u\n", header.connectionID);
 		std::shared_ptr<Messages::Message> pMessage = m_Messages[header.opcode]->CreateInstance();
 		pMessage->m_ConnectionID = header.connectionID;
 
@@ -71,13 +71,13 @@ void PacketHandler::ProcessPacket(Packet& aPacket)
 		}
 		else
 		{
-			printf("ERROR! Not enough bytes to deserialize message (%u bytes). Messages read were:\n", packetSize);
+			g_Network->GetDebugger()->Print("ERROR! Not enough bytes to deserialize message (%u bytes). Messages read were: " + std::to_string(packetSize));
 			uint8_t id = 0;
 			uint16_t totalBytes = 0;
 			for (auto it : messagesRead)
 			{
 				totalBytes += it.size;
-				printf("ID %u: \"%s\" (%u bytes, %u/%u)", id, it.name.c_str(), it.size, totalBytes, packetSize);
+				g_Network->GetDebugger()->Print("ID " + std::to_string(id) + ": \"" + it.name.c_str() + "\" (" + std::to_string(it.size) + " bytes, " + std::to_string(totalBytes) + "/" + std::to_string(packetSize) + ")");
 				id++;
 			}
 			break;
@@ -157,6 +157,6 @@ void EvayrNet::Messages::ACK_Receive(const Messages::ACK& acMessage)
 	}
 	else
 	{
-		printf("ERROR! ACK with Connection ID %u is nullptr!\n", acMessage.connectionID);
+		g_Network->GetDebugger()->Print("ERROR! ACK with Connection ID " + std::to_string(acMessage.connectionID) + " is nullptr!");
 	}
 }

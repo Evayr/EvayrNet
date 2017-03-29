@@ -27,7 +27,7 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 	{
 		case Messages::EConnectionResult::RESULT_SUCCESS:
 		{
-			printf("Successfully connected to the server! Our Connection ID is: %i\n", acMessage.connectionID);
+			g_Network->GetDebugger()->Print("Successfully connected to the server! Our Connection ID is: " + std::to_string(acMessage.connectionID));
 			g_Network->GetUDPSocket()->SetConnected(true);
 			g_Network->GetUDPSocket()->SetConnectionID(acMessage.connectionID);
 			break;
@@ -35,7 +35,7 @@ void NetworkClient::OnConnectionResponse(const Messages::ConnectionResponse& acM
 
 		case Messages::EConnectionResult::RESULT_SERVER_FULL:
 		{
-			printf("Failed to connect to the server: Server is full!\n");
+			g_Network->GetDebugger()->Print("Failed to connect to the server: Server is full!\n");
 			g_Network->GetUDPSocket()->SetConnected(false);
 			break;
 		}
@@ -54,25 +54,25 @@ void NetworkClient::OnDisconnect(const Messages::Disconnect& acMessage)
 	{
 		case Messages::EDisconnectReason::REASON_QUIT:
 		{
-			printf("Connection ID %i has quit\n", acMessage.connectionID);
+			g_Network->GetDebugger()->Print("Connection ID " + std::to_string(acMessage.connectionID) + " has quit");
 			break;
 		}
 
 		case Messages::EDisconnectReason::REASON_TIMED_OUT:
 		{
-			printf("Connection ID %i has been timed out.\n", acMessage.connectionID);
+			g_Network->GetDebugger()->Print("Connection ID " + std::to_string(acMessage.connectionID) + " has been timed out.");
 			break;
 		}
 
 		case Messages::EDisconnectReason::REASON_KICKED:
 		{
-			printf("Connection ID %i has been kicked.\n", acMessage.connectionID);
+			g_Network->GetDebugger()->Print("Connection ID " + std::to_string(acMessage.connectionID) + " has been kicked.");
 			break;
 		}
 
 		case Messages::EDisconnectReason::REASON_BANNED:
 		{
-			printf("Connection ID %i has been banned.\n", acMessage.connectionID);
+			g_Network->GetDebugger()->Print("Connection ID " + std::to_string(acMessage.connectionID) + " has been banned.");
 			break;
 		}
 	}

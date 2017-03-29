@@ -51,14 +51,14 @@ void UDPSocket::ConnectTo(const char* acpIP, uint16_t aPort)
 	m_ConnectionAttempts = 0;
 	m_ConnectClock = clock() - kRetryConnectInterval; // Start right away
 
-	printf("Connecting to %s:%u...\n", ip.m_Address.c_str(), aPort);
+	g_Network->GetDebugger()->Print("Connecting to " + ip.m_Address.c_str() + ":" + std::to_string(aPort) + "...");
 }
 
 void UDPSocket::Disconnect()
 {
 	if (m_Connected)
 	{
-		//printf("Saying goodbye to everyone\n");
+		//g_Network->GetDebugger()->Print("Saying goodbye to everyone\n");
 		// Send disconnect message to everyone
 		auto pDisconnectMessage = std::make_shared<Messages::Disconnect>();
 		pDisconnectMessage->connectionID = m_ConnectionID;
@@ -86,8 +86,6 @@ void UDPSocket::Update()
 
 void UDPSocket::AddMessage(std::shared_ptr<Messages::Message> apMessage, uint16_t aConnectionID, bool aStoreACK)
 {
-	//printf("Adding a message for Connection ID %u called \"%s\"\n", aConnectionID, apMessage->GetMessageName());
-
 	// Add our connectionID to the message
 	apMessage->m_ConnectionID = m_ConnectionID;
 
@@ -144,7 +142,7 @@ uint16_t UDPSocket::ProcessIPAddress(const IPAddress& acIPAddress)
 
 		// No connection found - create new one
 		uint16_t connectionID = m_ConnectionIDGenerator.GenerateID();
-		printf("Adding %s:%u as a new connection with connection ID %u...\n", acIPAddress.m_Address.c_str(), acIPAddress.m_Port, connectionID);
+		g_Network->GetDebugger()->Print("Adding " + acIPAddress.m_Address.c_str()  + ":" + std::to_string(acIPAddress.m_Port) + " as a new connection with connection ID " + std::to_string(connectionID) + "...");
 
 		m_Connections.push_back(Connection(acIPAddress, connectionID, g_Network->GetNetworkSystem()->IsServer()));
 		return connectionID;
@@ -165,7 +163,7 @@ void UDPSocket::ProcessACKAcknowledgment(const Messages::AcknowledgeACK& acACK)
 	}
 	else
 	{
-		printf("ERROR: Trying to Acknowledge ACK for a connection that doesn't exist! Connection ID: %u\n", acACK.connectionID);
+		g_Network->GetDebugger()->Print("ERROR: Trying to Acknowledge ACK for a connection that doesn't exist! Connection ID: " + std::to_string(acACK.connectionID) + "\n");
 	}
 }
 
@@ -311,13 +309,13 @@ void UDPSocket::Connect()
 
 	if (m_ConnectionAttempts >= kConnectionAttempts)
 	{
-		printf("Failed to connect to the server: No response.\n");
+		g_Network->GetDebugger()->Print("Failed to connect to the server: No response.\n");
 		m_Connected = false;
 		m_Connecting = false;
 	}
 	else
 	{
-		printf("No response yet, retrying...\n");
+		g_Network->GetDebugger()->Print("No response yet, retrying...\n");
 	}
 }
 
@@ -360,8 +358,6 @@ void UDPSocket::UpdateStatistics()
 	RemoveTimeIfExceedsAmount(&m_PPSLost);
 	RemoveTimeIfExceedsAmount(&m_DataPerSecondSent);
 	RemoveTimeIfExceedsAmount(&m_DataPerSecondReceived);
-
-	//printf("PPS OUT: %i | PPS IN: %i | PPS LOST: %i\n", m_PPSOut.size(), m_PPSIn.size(), m_PPSLost.size());
 }
 
 void UDPSocket::RemoveTimeIfExceedsAmount(std::list<clock_t>* apList, float aTime)
@@ -418,5 +414,5 @@ void EvayrNet::Messages::Heartbeat_Receive(const Messages::Heartbeat& acMessage)
 
 void EvayrNet::Messages::PrintText_Receive(const Messages::PrintText& acMessage)
 {
-	printf("Connection ID %i: \"%s\"\n", acMessage.m_ConnectionID, acMessage.text.c_str());
+	g_Network->GetDebugger()->Print("Connection ID " + std::to_string(acMessage.m_ConnectionID) + ": \"" + acMessage.text.c_str() + "\"\n");
 }

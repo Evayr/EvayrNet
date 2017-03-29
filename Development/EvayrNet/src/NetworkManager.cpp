@@ -161,6 +161,11 @@ UDPSocket* NetworkManager::GetUDPSocket()
 	return m_pUDPSocket.get();
 }
 
+NetworkDebugger* EvayrNet::NetworkManager::GetDebugger()
+{
+	return &m_NetworkDebugger;
+}
+
 const uint32_t EvayrNet::NetworkManager::GetNewestPing(uint16_t aConnectionID) const
 {
 	if (m_pUDPSocket->IsConnected() == false) return 0;

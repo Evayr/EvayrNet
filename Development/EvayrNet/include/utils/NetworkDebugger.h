@@ -12,10 +12,15 @@ namespace EvayrNet
 		NetworkDebugger();
 		~NetworkDebugger();
 
+		void Enable();
+		void Disable();
+
 		void Print(const std::string& acText);
-		void Store(const std::string& acText, const std::string& acFileName, bool aPrintToConsole = false);
+		void SaveString(const std::string& acText, const std::string& acFileName, bool aPrintToConsole = false, bool aAddNewline = true);
 
 	private:
+		bool m_enabled;
+
 		std::ofstream m_fileStream;
 	};
 }

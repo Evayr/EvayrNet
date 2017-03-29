@@ -19,6 +19,10 @@ Connection::Connection(const IPAddress& acIPAddress, uint16_t aConnectionID, boo
 	, m_TempPingsRecorded(0)
 	, m_SendHeartbeats(aSendHeartbeats)
 {
+	for (uint8_t i = 0; i < kPingStorageCount; ++i)
+	{
+		m_RecentPings[i] = 0;
+	}
 }
 
 Connection::~Connection()
@@ -247,6 +251,13 @@ void Connection::ProcessHeartbeat(const Messages::Heartbeat& acMessage)
 
 void EvayrNet::Connection::PushPing(uint32_t aPing)
 {
+	// Validate ping
+	if (aPing > kMaximumPing)
+	{
+		aPing = kMaximumPing;
+	}
+
+	// Move up recent pings
 	for (uint8_t i = kPingStorageCount - 1; i > 0; --i)
 	{
 		m_RecentPings[i] = m_RecentPings[i - 1];

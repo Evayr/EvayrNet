@@ -22,6 +22,7 @@ namespace EvayrNet
 			kDefaultConnectionTimout = 15000, // ms
 			kResendDelay = 5, // ms - rough estimation for the processing delay / ping differential
 			kPingStorageCount = 8,
+			kMaximumPing = kDefaultConnectionTimout,
 		};
 
 		struct CachedACKMessage

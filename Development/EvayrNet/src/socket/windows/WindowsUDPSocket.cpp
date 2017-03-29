@@ -1,5 +1,6 @@
 #if defined(_WIN64) || defined(_WIN32)
 
+#include "NetworkManager.h"
 #include "socket\windows\WindowsUDPSocket.h"
 #include <iostream>
 

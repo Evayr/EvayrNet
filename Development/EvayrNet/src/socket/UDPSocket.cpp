@@ -51,7 +51,7 @@ void UDPSocket::ConnectTo(const char* acpIP, uint16_t aPort)
 	m_ConnectionAttempts = 0;
 	m_ConnectClock = clock() - kRetryConnectInterval; // Start right away
 
-	g_Network->GetDebugger()->Print("Connecting to " + ip.m_Address.c_str() + ":" + std::to_string(aPort) + "...");
+	g_Network->GetDebugger()->Print("Connecting to " + ip.m_Address + ":" + std::to_string(aPort) + "...");
 }
 
 void UDPSocket::Disconnect()
@@ -142,7 +142,7 @@ uint16_t UDPSocket::ProcessIPAddress(const IPAddress& acIPAddress)
 
 		// No connection found - create new one
 		uint16_t connectionID = m_ConnectionIDGenerator.GenerateID();
-		g_Network->GetDebugger()->Print("Adding " + acIPAddress.m_Address.c_str()  + ":" + std::to_string(acIPAddress.m_Port) + " as a new connection with connection ID " + std::to_string(connectionID) + "...");
+		g_Network->GetDebugger()->Print("Adding " + acIPAddress.m_Address  + ":" + std::to_string(acIPAddress.m_Port) + " as a new connection with connection ID " + std::to_string(connectionID) + "...");
 
 		m_Connections.push_back(Connection(acIPAddress, connectionID, g_Network->GetNetworkSystem()->IsServer()));
 		return connectionID;

@@ -309,13 +309,13 @@ void UDPSocket::Connect()
 
 	if (m_ConnectionAttempts >= kConnectionAttempts)
 	{
-		g_Network->GetDebugger()->Print("Failed to connect to the server: No response.\n");
+		g_Network->GetDebugger()->Print("Failed to connect to the server: No response.");
 		m_Connected = false;
 		m_Connecting = false;
 	}
 	else
 	{
-		g_Network->GetDebugger()->Print("No response yet, retrying...\n");
+		g_Network->GetDebugger()->Print("No response yet, retrying...");
 	}
 }
 

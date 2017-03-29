@@ -35,7 +35,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 {
 	if (g_Network->GetUDPSocket()->GetActiveConnectionsCount() < m_MaxPlayerCount)
 	{
-		printf("Client accepted. Connection ID: %u\n", g_Network->GetUDPSocket()->GetNewestConnection()->GetConnectionID());
+		g_Network->GetDebugger()->Print("Client accepted. Connection ID: " + std::to_string(g_Network->GetUDPSocket()->GetNewestConnection()->GetConnectionID()));
 
 		// Welcome the client
 		auto pMessage = std::make_shared<Messages::ConnectionResponse>();
@@ -51,7 +51,7 @@ void NetworkServer::OnConnectionRequest(const Messages::ConnectionRequest& acMes
 	}
 	else
 	{
-		printf("Client refused\n");
+		g_Network->GetDebugger()->Print("Client connection request has been refused\n");
 		// Refuse the client
 		auto pMessage = std::make_shared<Messages::ConnectionResponse>();
 		pMessage->response = Messages::EConnectionResult::RESULT_SERVER_FULL;
@@ -72,7 +72,7 @@ void NetworkServer::OnDisconnect(const Messages::Disconnect& acMessage)
 	
 	if (pConnection)
 	{
-		printf("Connection ID %i has disconnected.\n", acMessage.connectionID);
+		g_Network->GetDebugger()->Print("Connection ID " + std::to_string(acMessage.connectionID) + " has disconnected.\n");
 		pConnection->SetActive(false);
 
 		// Send callback to application

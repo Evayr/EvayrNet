@@ -8,6 +8,7 @@
 #include "socket\UDPSocket.h"
 #include "systems\NetworkSystem.h"
 #include "utils\NetworkSimulator.h"
+#include "utils\NetworkDebugger.h"
 
 namespace EvayrNet
 {
@@ -57,6 +58,7 @@ namespace EvayrNet
 		// Classes gets
 		NetworkSystem* GetNetworkSystem();
 		UDPSocket* GetUDPSocket();
+		NetworkDebugger* GetDebugger();
 
 		// Debugging info
 		const uint32_t GetNewestPing(uint16_t aConnectionID = UDPSocket::kServerConnectionID) const;
@@ -77,6 +79,7 @@ namespace EvayrNet
 		std::unique_ptr<UDPSocket> m_pUDPSocket;
 		std::unique_ptr<NetworkSystem> m_pNetworkSystem;
 		NetworkSimulator m_NetworkSimulator;
+		NetworkDebugger m_NetworkDebugger;
 	};
 
 	extern NetworkManager* g_Network;

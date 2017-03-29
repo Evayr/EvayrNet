@@ -1,5 +1,6 @@
 #if defined(_WIN64) || defined(_WIN32)
 
+#include "NetworkManager.h"
 #include "socket\windows\WindowsUDPSocket.h"
 #include <iostream>
 
@@ -53,7 +54,7 @@ void EvayrNet::WindowsUDPSocket::Bind(uint16_t aPort)
 	}
 	else
 	{
-		printf("Successfully bound the socket to port %i.\n", aPort);
+		g_Network->GetDebugger()->Print("Successfully bound the socket to port " + std::to_string(aPort) + ".");
 	}
 }
 
@@ -86,8 +87,6 @@ void WindowsUDPSocket::Send()
 				throw std::system_error(WSAGetLastError(), std::system_category(), "Failed to send data.");
 			}
 
-			//printf("Sent %u bytes of data to %s:%u\n", connection.GetPacket(j)->GetMessagesSize(), connection.GetIPAddress().m_Address.c_str(), connection.GetIPAddress().m_Port);
-
 			m_PPSOut.push_back(clock());
 		}
 
@@ -105,13 +104,11 @@ void WindowsUDPSocket::Receive()
 
 	if (messageSize == SOCKET_ERROR) // -1
 	{
-		//printf("Error receiving data! Error code: %d\n", WSAGetLastError());
+		//g_Network->GetDebugger()->Print("Error receiving data! Error code: " + std::to_string(WSAGetLastError()));
 	}
 
 	else if (messageSize > 0)
 	{
-		//printf("Received %u bytes of data...\n", messageSize);
-
 		// Log data
 		m_DataPerSecondReceived.push_back(DataDebugInfo(messageSize, clock()));
 

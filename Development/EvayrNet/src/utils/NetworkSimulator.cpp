@@ -53,12 +53,12 @@ void NetworkSimulator::ProcessMessage(std::shared_ptr<Messages::Message> apMessa
 	m_messagesToSend.push_back(message);
 
 	// Debug
-	//printf("Delaying a message called \"%s\" with %ums\n", apMessage->GetMessageName(), delay);
+	//g_Network->GetDebugger()->Print("Delaying a message called \"" + apMessage->GetMessageName() + "\" with " + std::to_string(delay) + "ms");
 }
 
 void NetworkSimulator::StartSimulation(const uint32_t acMinimumDelayMS, const uint32_t acRandomDelayMS, const float acPacketLossPct, const float acPacketDuplicationPct)
 {
-	printf("Started simulation with %u + ~%ums, %0.3f%% packet loss and %0.3f%% packet duplication.\n", acMinimumDelayMS, acRandomDelayMS, acPacketLossPct, acPacketDuplicationPct);
+	g_Network->GetDebugger()->Print("Started simulation with " + std::to_string(acMinimumDelayMS) + " + ~" + std::to_string(acRandomDelayMS) + "ms, " + std::to_string(acPacketLossPct) + "% packet loss and " + std::to_string(acPacketDuplicationPct) + "% packet duplication.");
 	m_simulating = true;
 
 	m_minimumDelay = acMinimumDelayMS;
@@ -70,7 +70,7 @@ void NetworkSimulator::StartSimulation(const uint32_t acMinimumDelayMS, const ui
 
 void NetworkSimulator::StopSimulation()
 {
-	printf("Stopped the simulation.");
+	g_Network->GetDebugger()->Print("Stopped the simulation.");
 	m_simulating = false;
 
 	// Send the remainder of the messages so we don't drop them all or send them later whenever a newer simulation starts.
@@ -84,14 +84,21 @@ const bool NetworkSimulator::IsSimulating() const
 
 void NetworkSimulator::SendMessages(bool aForceSend)
 {
-	clock_t now = clock();
+	if (m_messagesToSend.size() == 0) return;
 
-	for (auto it = m_messagesToSend.begin(); it != m_messagesToSend.end(); ++it)
+	clock_t now = clock();
+	auto it = m_messagesToSend.begin();
+
+	while (it != m_messagesToSend.end())
 	{
 		if (int32_t(it->sendTime - now) <= 0 || aForceSend)
 		{
 			g_Network->GetUDPSocket()->AddMessage(it->pMessage, it->connectionID, it->storeACK);
-			it = m_messagesToSend.erase(it);
+			m_messagesToSend.erase(it++);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }

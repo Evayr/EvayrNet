@@ -58,7 +58,7 @@ void NetworkSimulator::ProcessMessage(std::shared_ptr<Messages::Message> apMessa
 
 void NetworkSimulator::StartSimulation(const uint32_t acMinimumDelayMS, const uint32_t acRandomDelayMS, const float acPacketLossPct, const float acPacketDuplicationPct)
 {
-	g_Network->GetDebugger()->Print("Started simulation with " + std::to_string(acMinimumDelayMS) + " + ~" + std::to_string(acRandomDelayMS) + "ms, " + std::to_string(acPacketLossPct) + "%% packet loss and " + std::to_string(acPacketDuplicationPct) + "%% packet duplication.");
+	g_Network->GetDebugger()->Print("Started simulation with " + std::to_string(acMinimumDelayMS) + " + ~" + std::to_string(acRandomDelayMS) + "ms, " + std::to_string(acPacketLossPct) + "% packet loss and " + std::to_string(acPacketDuplicationPct) + "% packet duplication.");
 	m_simulating = true;
 
 	m_minimumDelay = acMinimumDelayMS;
@@ -84,14 +84,21 @@ const bool NetworkSimulator::IsSimulating() const
 
 void NetworkSimulator::SendMessages(bool aForceSend)
 {
-	clock_t now = clock();
+	if (m_messagesToSend.size() == 0) return;
 
-	for (auto it = m_messagesToSend.begin(); it != m_messagesToSend.end(); ++it)
+	clock_t now = clock();
+	auto it = m_messagesToSend.begin();
+
+	while (it != m_messagesToSend.end())
 	{
 		if (int32_t(it->sendTime - now) <= 0 || aForceSend)
 		{
 			g_Network->GetUDPSocket()->AddMessage(it->pMessage, it->connectionID, it->storeACK);
-			it = m_messagesToSend.erase(it);
+			m_messagesToSend.erase(it++);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }

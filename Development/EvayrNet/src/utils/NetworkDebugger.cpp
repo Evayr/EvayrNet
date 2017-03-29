@@ -1,4 +1,5 @@
 #include "utils\NetworkDebugger.h"
+#include "NetworkManager.h"
 
 using namespace EvayrNet;
 
@@ -32,13 +33,22 @@ void NetworkDebugger::SaveString(const std::string& acText, const std::string& a
 {
 	if (!m_enabled) return;
 
-	m_fileStream.open("./Data/" + acFileName, std::ios::ate | std::ios::app | std::ios::in | std::ios::out);
-	m_fileStream << acText;
-	if (aAddNewline)
+	std::fstream file;
+	file.open(acFileName, std::ios::ate | std::ios::app | std::ios::in | std::ios::out);
+
+	if (!file.is_open())
 	{
-		m_fileStream << std::endl;
+		g_Network->GetDebugger()->Print("Failed to open file \"" + acFileName + "\"!");
 	}
-	m_fileStream.close();
+	else
+	{
+		file << acText;
+		if (aAddNewline)
+		{
+			file << std::endl;
+		}
+		file.close();
+	}
 
 	if (aPrintToConsole)
 	{

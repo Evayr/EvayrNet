@@ -20,8 +20,6 @@ namespace EvayrNet
 
 	private:
 		bool m_enabled;
-
-		std::ofstream m_fileStream;
 	};
 }
 

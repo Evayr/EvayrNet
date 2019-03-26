@@ -322,8 +322,6 @@ if f:
 			Log("Processing word: \"" + word + "\"")
 			if message == "":
 				message = word
-				global serializationLines
-				global deserializationLines
 				serializationLines = []
 				deserializationLines = []
 				stringLines = []
